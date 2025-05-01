@@ -19,7 +19,7 @@ router.post('/login', commonValidation(UserLoginDTO), userController.login);
 router.get('/verify/:token', userController.verify);
 router.post('/forgot-password', commonValidation(ForgotPasswordDTO), userController.forgotPassword);
 router.get('/reset-password/:token', userController.showResetForm);
-router.get('/reset-password/:token', commonValidation(PasswordResetDTO), userController.resetPassword);
+router.post('/reset-password/:token', commonValidation(PasswordResetDTO), userController.resetPassword);
 router.post('/logout', validateToken,  userController.logOut);
 router.get('/profile', validateToken,  userController.profile);
 

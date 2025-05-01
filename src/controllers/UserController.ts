@@ -76,7 +76,7 @@ export class UserController {
   
   // Forgot password
   async forgotPassword(request: Request, response: Response): Promise<void> {
-    const { email } = request.params;
+    const { email } = request.body;
     const result = await UserService.forgotPassword(email);
 
     response.status(result.code).json({
@@ -93,7 +93,7 @@ export class UserController {
 
     const result = await UserService.checkResetTokenValidity(token);
 
-    if (!result.success) {
+    if (result.success) {
 
       response.send(`
         <form action="/reset-password/${token}" method="POST">
@@ -101,7 +101,7 @@ export class UserController {
           <input type="password" name="password" required />
           <br />
           <label>Confirm Password:</label>
-          <input type="password" name="confirm_password" required />
+          <input type="password" name="confirmed_password" required />
           <br />
           <button type="submit">Reset Password</button>
         </form>
@@ -131,11 +131,34 @@ export class UserController {
 
     const result = await UserService.resetPassword(token, password);
 
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
+    if (result.success) {
+
+      response.status(result.code).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>HRMS</title>
+          </head>
+          <body>
+            <h1>${result.message}</h1>
+          </body>
+        </html>
+      `);
+
+    } else {
+
+      response.status(result.code).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>HRMS</title>
+          </head>
+          <body>
+            <h1>${result.message}</h1>
+          </body>
+        </html>
+      `);
+    }
   }
 
   // Log Out
