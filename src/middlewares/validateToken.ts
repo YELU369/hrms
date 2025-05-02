@@ -4,7 +4,6 @@ import { BlacklistedToken } from '@/entity/BlacklistedToken';
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-
 export interface AuthRequest extends Request {
   user_id?: number;
 }
@@ -27,11 +26,14 @@ export const validateToken = async (request: AuthRequest, response: Response, ne
   try {
 
     const decoded: any = jwt.verify(token, jwtconfig.secret);
-    request.user_id = decoded.id;
-    console.log('User ID: ', decoded.id);
+    request.user_id = decoded.user_id;
     next();
 
   } catch (error) {
-    response.status(403).json({ message: 'Invalid or expired token!' });
+    response.status(401).json({
+      success: false,
+      message: 'TOKEN_INVALID',
+      data: null,
+    });
   }
 }
