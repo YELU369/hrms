@@ -15,9 +15,11 @@ import { UserProfileDTO } from "@/DTOs/UserProfileDTO";
 
 export class UserService {
 
+  private static repo = AppDataSource.getRepository(User);
+
   static async register(data: UserRegisterDTO) {
 
-    const isExisted = await AppDataSource.getRepository(User).exists({
+    const isExisted = await this.repo.exists({
       where: {
         name: data.name,
         email: data.email,
@@ -41,8 +43,8 @@ export class UserService {
 
       // Hash password and save user
       data.password = await bcrypt.hash(data.password, generalconfig.saltRounds);
-      const userRepository = AppDataSource.getRepository(User);
-      const user = AppDataSource.getRepository(User).create(data);
+      const userRepository = this.repo;
+      const user = this.repo.create(data);
       await userRepository.save(user);
 
       // Save verification record in email_verifications table
@@ -80,7 +82,7 @@ export class UserService {
 
     try {
   
-      const user = await AppDataSource.getRepository(User).findOne({
+      const user = await this.repo.findOne({
         where: { email: data.email }
       });
   
@@ -172,7 +174,7 @@ export class UserService {
 
   static async forgotPassword(email: string) {
     
-    const userRepository = AppDataSource.getRepository(User);
+    const userRepository = this.repo;
 
     // Find user by email
     const user = await userRepository.findOne({
@@ -217,7 +219,7 @@ export class UserService {
 
   static async checkResetTokenValidity(token: string) {
 
-    const userRepository = AppDataSource.getRepository(User);
+    const userRepository = this.repo;
 
     const result = await AppDataSource
                         .getRepository(User)
@@ -256,7 +258,7 @@ export class UserService {
 
   static async resetPassword(token: string, password: string): Promise<ServiceResult> {
 
-    const userRepository = AppDataSource.getRepository(User);
+    const userRepository = this.repo;
 
     const result = await this.checkResetTokenValidity(token);
     
@@ -283,7 +285,7 @@ export class UserService {
 
   static async getProfileInfo(userId?: number): Promise<ServiceResult> {
 
-    const repo = AppDataSource.getRepository(User);
+    const repo = this.repo;
     const user = await repo.findOne({
       where: {
         id: userId

@@ -22,7 +22,7 @@ import { WorkScheduleDetail } from "./entity/WorkScheduleDetail"
 import { EmailVerification } from "./entity/EmailVerification"
 import { BlacklistedToken } from "./entity/BlacklistedToken"
 
-console.log('DB Config: ', dbconfig);
+// console.log('DB Config: ', dbconfig);
 
 export const AppDataSource = new DataSource({
 

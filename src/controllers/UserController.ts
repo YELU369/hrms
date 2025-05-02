@@ -1,16 +1,12 @@
 import { Request, Response } from "express";
-import { UserRepository } from "@/repositories/UserRepository";
 import { UserRegisterDTO } from "@/DTOs/UserRegisterDTO";
 import { UserService } from "@/services/UserService";
 import { UserLoginDTO } from "@/DTOs/UserLoginDTO";
 import { BlacklistedToken } from "@/entity/BlacklistedToken";
 import { AppDataSource } from "@/data-source";
-import { User } from "@/entity/User";
 import { AuthRequest } from "@/middlewares/validateToken";
 
 export class UserController {
-
-  private repository: UserRepository;
 
   constructor() {}
 
@@ -90,7 +86,6 @@ export class UserController {
   async showResetForm(request: Request, response: Response): Promise<void> {
 
     const { token } = request.params;
-
     const result = await UserService.checkResetTokenValidity(token);
 
     if (result.success) {
