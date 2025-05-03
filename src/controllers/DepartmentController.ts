@@ -1,13 +1,8 @@
-import { AppDataSource } from "@/data-source";
 import { CreateDTO as DeptCreateDTO } from "@/DTOs/Department/CreateDTO";
 import { UpdateDTO as DeptUpdateDTO } from "@/DTOs/Department/UpdateDTO";
-import { Department } from "@/entity/Department";
-import { User } from "@/entity/User";
-import { Paginator } from "@/helpers/Paginator";
-import { QueryBuilderWrapper } from "@/helpers/QueryBuilderWrapper";
 import { AuthRequest } from "@/middlewares/validateToken";
 import { DepartmentService } from "@/services/DepartmentService";
-import { Request, Response } from "express";
+import { Response } from "express";
 
 export class DepartmentController {
 
