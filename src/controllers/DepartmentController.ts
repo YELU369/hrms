@@ -36,8 +36,8 @@ export class DepartmentController {
 
   async show(request: AuthRequest, response: Response): Promise<void> {
 
-    const { departmentId } = request.params;
-    const result = await DepartmentService.getDetailInfo(parseInt(departmentId));
+    const { id } = request.params;
+    const result = await DepartmentService.getDetailInfo(parseInt(id));
 
     response.status(result.code).json({
       success: result.success,
@@ -48,11 +48,11 @@ export class DepartmentController {
 
   async update(request: AuthRequest, response: Response): Promise<void> {
 
-    const { departmentId } = request.params;
+    const { id } = request.params;
     const data: DeptUpdateDTO = request.body;
     const userId = Number(request.user_id);
 
-    const result = await DepartmentService.update(parseInt(departmentId), userId, data);
+    const result = await DepartmentService.update(parseInt(id), userId, data);
 
     response.status(result.code).json({
       success: result.success,
@@ -63,9 +63,8 @@ export class DepartmentController {
 
   async delete(request: AuthRequest, response: Response): Promise<void> {
 
-    const { departmentId } = request.params;
-
-    const result = await DepartmentService.delete(parseInt(departmentId));
+    const { id } = request.params;
+    const result = await DepartmentService.delete(parseInt(id));
 
     response.status(result.code).json({
       success: result.success,

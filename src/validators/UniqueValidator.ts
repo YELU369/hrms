@@ -15,6 +15,6 @@ export class UniqueValidator implements ValidatorConstraintInterface {
 
   defaultMessage(args: ValidationArguments) {
     const [entity, property] = args.constraints;
-    return `${property} already exists.`;
+    return `The ${property} already exists.`;
   }
 }

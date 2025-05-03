@@ -10,11 +10,11 @@ export class Position {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Department, department => department.positions)
+  @ManyToOne(() => Department, department => department.positions, { nullable: false })
   @JoinColumn({ name: 'department_id' })
   department!: Department;
 
-  @Column()
+  @Column({ unique: true})
   title!: string;
 
   @Column({ default: false })

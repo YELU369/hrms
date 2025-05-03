@@ -7,12 +7,16 @@ import { ForgotPasswordDTO } from './DTOs/ForgotPasswordDTO';
 import { PasswordResetDTO } from './DTOs/PasswordResetDTO';
 import { validateToken } from './middlewares/validateToken';
 import { DepartmentController } from './controllers/DepartmentController';
+import { PositionController } from './controllers/PositionController';
 import { CreateDTO as DeptCreateDTO } from './DTOs/Department/CreateDTO';
 import { UpdateDTO as DeptUpdateDTO } from './DTOs/Department/UpdateDTO';
+import { CreateDTO as PositionCreateDTO } from './DTOs/Position/CreateDTO';
+import { UpdateDTO as PositionUpdateDTO } from './DTOs/Position/UpdateDTO';
 
 const router = Router();
 const userController = new UserController();
 const departmentController = new DepartmentController();
+const positionController = new PositionController();
 
 router.get('/', (request: Request, response: Response): void => {
   response.status(200).send('Hello World with TypeScript!');
@@ -29,8 +33,14 @@ router.get('/profile', validateToken,  userController.profile);
 
 router.get('/departments', validateToken, departmentController.index);
 router.post('/departments', validateToken, commonValidation(DeptCreateDTO), departmentController.store);
-router.get('/departments/view/:departmentId', validateToken, departmentController.show);
-router.post('/departments/update/:departmentId', validateToken, commonValidation(DeptUpdateDTO), departmentController.update);
-router.post('/departments/delete/:departmentId', validateToken, departmentController.delete);
+router.get('/departments/view/:id', validateToken, departmentController.show);
+router.put('/departments/update/:id', validateToken, commonValidation(DeptUpdateDTO), departmentController.update);
+router.delete('/departments/delete/:id', validateToken, departmentController.delete);
+
+router.get('/positions', validateToken, positionController.index);
+router.post('/positions', validateToken, commonValidation(PositionCreateDTO), positionController.store);
+router.get('/positions/view/:id', validateToken, positionController.show);
+router.put("/positions/update/:id", validateToken, commonValidation(PositionUpdateDTO), positionController.update);
+router.delete('/positions/delete/:id', validateToken, positionController.delete);
 
 export default router;

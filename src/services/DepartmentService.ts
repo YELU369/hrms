@@ -38,8 +38,8 @@ export class DepartmentService {
 
     const wrapper = new QueryBuilderWrapper(baseQuery)
                     .when(!!searchParams.keyword, query =>
-                      query.andWhere('dept.name LIKE :name', { name: `%${searchParams.keyword}%` })
-                        .orWhere('dept.description LIKE :name', { name: `%${searchParams.keyword}%` })
+                      query.andWhere('dept.name LIKE :keyword', { keyword: `%${searchParams.keyword}%` })
+                        .orWhere('dept.description LIKE :keyword', { keyword: `%${searchParams.keyword}%` })
                     );
 
     const paginator = new Paginator(wrapper.getQuery(), page, limit);
@@ -85,7 +85,7 @@ export class DepartmentService {
     }
   }
 
-  static async getDetailInfo(departmentId: number): Promise<ServiceResult> {
+  static async getDetailInfo(id: number): Promise<ServiceResult> {
 
     try {
       
@@ -99,10 +99,10 @@ export class DepartmentService {
                                         'updater.id',
                                         'updater.name'
                                       ])
-                                      .where('dept.id = :id', { id: departmentId })
+                                      .where('dept.id = :id', { id: id })
                                       .getOne();
       if (!department) {
-        return ServiceResult.error('Department not found!');
+        return ServiceResult.error('Department not found!', 404);
       }
 
       const formattedDepartment = {
@@ -122,13 +122,13 @@ export class DepartmentService {
     }
   }
 
-  static async update(departmentId: number, userId: number, data: DeptUpdateDTO): Promise<ServiceResult> {
+  static async update(id: number, userId: number, data: DeptUpdateDTO): Promise<ServiceResult> {
 
     try {
 
-      const department = await this.repo.findOneBy({ id: departmentId });
+      const department = await this.repo.findOneBy({ id: id });
       if (!department) {
-        return ServiceResult.error('Department not found!');
+        return ServiceResult.error('Department not found!', 404);
       }
 
       const user = await this.userRepo.findOneBy({ id: userId });
@@ -150,16 +150,16 @@ export class DepartmentService {
     }
   }
 
-  static async delete(departmentId: number): Promise<ServiceResult> {
+  static async delete(id: number): Promise<ServiceResult> {
 
     try {
 
       const department = await this.repo.findOne({
-        where: { id: departmentId }
+        where: { id: id }
       });
   
       if (!department) {
-        return ServiceResult.error('Department not found!');
+        return ServiceResult.error('Department not found!', 404);
       }
       
       await this.repo.remove(department);
