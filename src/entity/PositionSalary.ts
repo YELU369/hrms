@@ -1,8 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
 import { Position } from './Position';
 import { User } from './User';
 
 @Entity({ name: 'position_salaries' })
+@Unique(['min_salary', 'start_from', 'position'])
+@Unique(['max_salary', 'start_from', 'position'])
 export class PositionSalary {
   
   @PrimaryGeneratedColumn()
@@ -12,10 +14,10 @@ export class PositionSalary {
   @JoinColumn({ name: 'position_id' })
   position!: Position;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  @Column({ type: 'integer' })
   min_salary!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  @Column({ type: 'integer' })
   max_salary!: number;
 
   @Column({ type: 'date' })
