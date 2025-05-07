@@ -45,17 +45,7 @@ export class DepartmentService {
     const paginator = new Paginator(wrapper.getQuery(), page, limit);
     const result = await paginator.paginate();
 
-    const formattedResult = result.list.map(department => {
-      return {
-        ...department,
-        updated_by: {
-          id: department.updated_by.id,
-          name: department.updated_by.name
-        }
-      };
-    });
-
-    return ServiceResult.success('Departments List', 200, formattedResult);
+    return ServiceResult.success('Departments List', 200, result);
   }
 
   static async create(data: DeptCreateDTO, userId: number): Promise<ServiceResult> {

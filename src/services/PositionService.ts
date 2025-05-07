@@ -58,22 +58,8 @@ export class PositionService {
 
     const paginator = new Paginator(wrapper.getQuery(), page, limit);
     const result = await paginator.paginate();
-
-    const formattedResult = result.list.map(position => {
-      return {
-        ...position,
-        department: {
-          id: position.department.id,
-          name: position.department.name
-        }, 
-        updated_by: {
-          id: position.updated_by.id,
-          name: position.updated_by.name
-        }
-      };
-    });
-
-    return ServiceResult.success('Positions List', 200, formattedResult);
+    
+    return ServiceResult.success('Positions List', 200, result);
   }
 
   static async create(data: PositionCreateDTO, userId: number): Promise<ServiceResult> {
