@@ -12,11 +12,15 @@ import { CreateDTO as DeptCreateDTO } from './DTOs/Department/CreateDTO';
 import { UpdateDTO as DeptUpdateDTO } from './DTOs/Department/UpdateDTO';
 import { CreateDTO as PositionCreateDTO } from './DTOs/Position/CreateDTO';
 import { UpdateDTO as PositionUpdateDTO } from './DTOs/Position/UpdateDTO';
+import { CreateDTO as SalaryCreateDTO } from "@/DTOs/Position/Salary/CreateDTO";
+import { UpdateDTO as SalaryUpdateDTO } from "@/DTOs/Position/Salary/UpdateDTO";
+import { PositionSalaryController } from './controllers/PositionSalaryController';
 
 const router = Router();
 const userController = new UserController();
 const departmentController = new DepartmentController();
 const positionController = new PositionController();
+const positionSalaryController = new PositionSalaryController();
 
 router.get('/', (request: Request, response: Response): void => {
   response.status(200).send('Hello World with TypeScript!');
@@ -42,5 +46,11 @@ router.post('/positions', validateToken, commonValidation(PositionCreateDTO), po
 router.get('/positions/view/:id', validateToken, positionController.show);
 router.put("/positions/update/:id", validateToken, commonValidation(PositionUpdateDTO), positionController.update);
 router.delete('/positions/delete/:id', validateToken, positionController.delete);
+
+router.get('/position/salaries', validateToken, positionSalaryController.index);
+router.post('/position/salaries', validateToken, commonValidation(SalaryCreateDTO), positionSalaryController.store);
+router.get('/position/salaries/view/:id', validateToken, positionSalaryController.show);
+router.put("/position/salaries/update/:id", validateToken, commonValidation(SalaryUpdateDTO), positionSalaryController.update);
+router.delete('/position/salaries/delete/:id', validateToken, positionSalaryController.delete);
 
 export default router;
