@@ -12,14 +12,17 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import { ServiceResult } from "@/ServiceResult";
 import { plainToInstance } from "class-transformer";
 import { UserProfileDTO } from "@/DTOs/UserProfileDTO";
+import { EntityManager } from "typeorm";
 
 export class UserService {
 
   private static repo = AppDataSource.getRepository(User);
 
-  static async register(data: UserRegisterDTO) {
+  static async register(data: UserRegisterDTO, manager?: EntityManager) {
 
-    const isExisted = await this.repo.exists({
+    const repo = manager ? manager.getRepository(User) : this.repo;
+
+    const isExisted = await repo.exists({
       where: {
         name: data.name,
         email: data.email,
@@ -43,8 +46,8 @@ export class UserService {
 
       // Hash password and save user
       data.password = await bcrypt.hash(data.password, generalconfig.saltRounds);
-      const userRepository = this.repo;
-      const user = this.repo.create(data);
+      const userRepository = repo;
+      const user = repo.create(data);
       await userRepository.save(user);
 
       // Save verification record in email_verifications table
@@ -64,7 +67,11 @@ export class UserService {
       
       await queryRunner.commitTransaction();
 
-      return ServiceResult.success('You were successfully registered.', 201);
+      return ServiceResult.success(
+        'You were successfully registered.', 
+        201, 
+        plainToInstance(UserProfileDTO, user, { excludeExtraneousValues: true })
+      );
 
     } catch (error) {
 
