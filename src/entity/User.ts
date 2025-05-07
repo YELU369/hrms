@@ -11,6 +11,8 @@ import { PositionSalary } from './PositionSalary';
 import { WorkScheduleDetail } from './WorkScheduleDetail';
 import { EmployeeEmergencyContact } from './EmployeeEmergencyContact';
 import { EmployeeSalary } from './EmployeeSalary';
+import { Employee } from './Employee';
+import { EmployeeUser } from './EmployeeUser';
 
 @Entity({ name: 'users' })
 export class User {
@@ -24,7 +26,7 @@ export class User {
   @Column()
   email!: string;
 
-  @Column()
+  @Column({ nullable: true })
   password!: string;
 
   @Column({ default: false })
@@ -38,6 +40,12 @@ export class User {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updated_at!: Date;
+
+  @OneToOne(() => EmployeeUser, employeeBinding => employeeBinding.employee)
+  employeeBinding!: EmployeeUser[];
+
+  created_employees: Employee[];
+  updated_employees: Employee[];
 
   created_departments: Department[];
   updated_departments: Department[];
@@ -72,4 +80,7 @@ export class User {
 
   created_work_schedule_details: WorkScheduleDetail[];
   updated_work_schedule_details: WorkScheduleDetail[];
+
+  created_employee_user_bindings: EmployeeUser[];
+  updated_employee_user_bindings: EmployeeUser[];
 }

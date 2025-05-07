@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, OneToOne } from 'typeorm';
 import { Department } from './Department';
 import { Position } from './Position';
 import { EmployeeAddress } from './EmployeeAddress';
@@ -11,6 +11,8 @@ import { OvertimeRequest } from './OvertimeRequest';
 import { Payroll } from './Payroll';
 import { EmployeeEmergencyContact } from './EmployeeEmergencyContact';
 import { EmployeeSalary } from './EmployeeSalary';
+import { User } from './User';
+import { EmployeeUser } from './EmployeeUser';
 
 @Entity({ name: 'employees' })
 export class Employee {
@@ -25,6 +27,9 @@ export class Employee {
   last_name!: string;
 
   @Column()
+  code!: string;
+
+  @Column({ unique: true })
   nrc!: string;
 
   @ManyToOne(() => Position, position => position.employees, { nullable: false })
@@ -53,11 +58,13 @@ export class Employee {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updated_at!: Date;
 
-  @Column()
-  created_by!: number;
+  @ManyToOne(() => User, user => user.created_leave_types, { nullable: false })
+  @JoinColumn({ name: 'created_by' })
+  created_by!: User;
 
-  @Column()
-  updated_by!: number;
+  @ManyToOne(() => User, user => user.updated_leave_types, { nullable: false })
+  @JoinColumn({ name: 'updated_by' })
+  updated_by!: User;
 
   @OneToMany(() => EmployeeSalary, salary => salary.employee)
   salaries!: EmployeeSalary[];
@@ -88,4 +95,7 @@ export class Employee {
 
   @OneToMany(() => Payroll, payroll => payroll.employee)
   payrolls!: Payroll[];
+
+  @OneToOne(() => EmployeeUser, userBinding => userBinding.employee)
+  userBinding!: EmployeeUser[];
 }

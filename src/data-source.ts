@@ -21,6 +21,7 @@ import { WorkSchedule } from "./entity/WorkSchedule"
 import { WorkScheduleDetail } from "./entity/WorkScheduleDetail"
 import { EmailVerification } from "./entity/EmailVerification"
 import { BlacklistedToken } from "./entity/BlacklistedToken"
+import { EmployeeUser } from "./entity/EmployeeUser"
 
 // console.log('DB Config: ', dbconfig);
 
@@ -59,7 +60,8 @@ export const AppDataSource = new DataSource({
         EmailVerification, 
         WorkSchedule,
         WorkScheduleDetail,
-        BlacklistedToken
+        BlacklistedToken, 
+        EmployeeUser,
     ],
     migrations: [],
     subscribers: [],

@@ -12,13 +12,11 @@ export class UpdateDTO {
   @IsNumber()
   @IsPositive()
   @IsNotEmpty()
-  @Validate(UniqueValidator, [PositionSalary, 'min_salary'])
   min_salary: number;
 
   @IsNumber()
   @IsPositive()
   @IsNotEmpty()
-  @Validate(UniqueValidator, [PositionSalary, 'max_salary'])
   max_salary: number;
 
   @Type(() => Date)
