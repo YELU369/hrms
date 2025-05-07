@@ -1,6 +1,6 @@
 import { AppDataSource } from "@/data-source";
-import { CreateDTO as positionCreateDTO } from "@/DTOs/Position/CreateDTO";
-import { UpdateDTO as positionUpdateDTO } from "@/DTOs/Position/UpdateDTO";
+import { CreateDTO as PositionCreateDTO } from "@/DTOs/Position/CreateDTO";
+import { UpdateDTO as PositionUpdateDTO } from "@/DTOs/Position/UpdateDTO";
 import { Department } from "@/entity/Department";
 import { Position } from "@/entity/Position";
 import { User } from "@/entity/User";
@@ -59,16 +59,16 @@ export class PositionService {
     const paginator = new Paginator(wrapper.getQuery(), page, limit);
     const result = await paginator.paginate();
 
-    const formattedResult = result.list.map(Position => {
+    const formattedResult = result.list.map(position => {
       return {
-        ...Position,
+        ...position,
         department: {
-          id: Position.department.id,
-          name: Position.department.name
+          id: position.department.id,
+          name: position.department.name
         }, 
         updated_by: {
-          id: Position.updated_by.id,
-          name: Position.updated_by.name
+          id: position.updated_by.id,
+          name: position.updated_by.name
         }
       };
     });
@@ -76,7 +76,7 @@ export class PositionService {
     return ServiceResult.success('Positions List', 200, formattedResult);
   }
 
-  static async create(data: positionCreateDTO, userId: number): Promise<ServiceResult> {
+  static async create(data: PositionCreateDTO, userId: number): Promise<ServiceResult> {
 
     try {
 
@@ -90,7 +90,7 @@ export class PositionService {
         return ServiceResult.error('Invalid department!', 403);
       }
 
-      const Position = this.repo.create({
+      const position = this.repo.create({
         title: data.title,
         is_manager: data.is_manager,
         description: data.description,
@@ -99,7 +99,7 @@ export class PositionService {
         updated_by: user,
       });
 
-      await this.repo.save(Position);
+      await this.repo.save(position);
 
       return ServiceResult.success('Position was successfully stored.', 201);
 
@@ -114,7 +114,7 @@ export class PositionService {
 
     try {
       
-      const Position = await this.repo.createQueryBuilder('position')
+      const position = await this.repo.createQueryBuilder('position')
                                       .innerJoin('position.department', 'department')
                                       .leftJoin('position.updated_by', 'updater')
                                       .select([
@@ -130,19 +130,19 @@ export class PositionService {
                                       ])
                                       .where('position.id = :id', { id: id })
                                       .getOne();
-      if (!Position) {
+      if (!position) {
         return ServiceResult.error('Position not found!', 404);
       }
 
       const formattedPosition = {
-        ...Position,
+        ...position,
         department: {
-          id: Position.department.id,
-          name: Position.department.name
+          id: position.department.id,
+          name: position.department.name
         }, 
         updated_by: {
-          id: Position.updated_by.id,
-          name: Position.updated_by.name
+          id: position.updated_by.id,
+          name: position.updated_by.name
         }
       };
   
@@ -155,7 +155,7 @@ export class PositionService {
     }
   }
 
-  static async update(id: number, userId: number, data: positionUpdateDTO): Promise<ServiceResult> {
+  static async update(id: number, userId: number, data: PositionUpdateDTO): Promise<ServiceResult> {
 
     try {
 
@@ -194,15 +194,15 @@ export class PositionService {
 
     try {
 
-      const Position = await this.repo.findOne({
+      const position = await this.repo.findOne({
         where: { id: id }
       });
   
-      if (!Position) {
+      if (!position) {
         return ServiceResult.error('Position not found!', 404);
       }
       
-      await this.repo.remove(Position);
+      await this.repo.remove(position);
 
       return ServiceResult.success('Position was successfully deleted.');
 
