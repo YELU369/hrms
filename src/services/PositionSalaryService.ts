@@ -112,20 +112,8 @@ export class PositionSalaryService {
       if (!salary) {
         return ServiceResult.error('Salary not found!', 404);
       }
-
-      const formattedPosition = {
-        ...salary,
-        position: {
-          id: salary.position.id,
-          name: salary.position.title
-        }, 
-        updated_by: {
-          id: salary.updated_by.id,
-          name: salary.updated_by.name
-        }
-      };
   
-      return ServiceResult.success('Position Salary Show', 200, formattedPosition);
+      return ServiceResult.success('Position Salary Show', 200, salary);
 
     } catch (error) {
 

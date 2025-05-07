@@ -95,15 +95,7 @@ export class DepartmentService {
         return ServiceResult.error('Department not found!', 404);
       }
 
-      const formattedDepartment = {
-        ...department,
-        updated_by: {
-          id: department.updated_by.id,
-          name: department.updated_by.name
-        }
-      };
-  
-      return ServiceResult.success('Department Show', 200, formattedDepartment);
+      return ServiceResult.success('Department Show', 200, department);
 
     } catch (error) {
 

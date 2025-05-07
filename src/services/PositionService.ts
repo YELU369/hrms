@@ -119,20 +119,8 @@ export class PositionService {
       if (!position) {
         return ServiceResult.error('Position not found!', 404);
       }
-
-      const formattedPosition = {
-        ...position,
-        department: {
-          id: position.department.id,
-          name: position.department.name
-        }, 
-        updated_by: {
-          id: position.updated_by.id,
-          name: position.updated_by.name
-        }
-      };
   
-      return ServiceResult.success('Position Show', 200, formattedPosition);
+      return ServiceResult.success('Position Show', 200, position);
 
     } catch (error) {
 
