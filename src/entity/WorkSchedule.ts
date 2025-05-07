@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, Unique } from 'typeorm';
 import { User } from './User';
 import { WorkScheduleDetail } from './WorkScheduleDetail';
 import { Employee } from './Employee';
 
 @Entity({ name: 'work_schedules' })
+@Unique(['start_from', 'employee'])
 export class WorkSchedule {
   
   @PrimaryGeneratedColumn()
