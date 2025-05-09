@@ -13,6 +13,7 @@ import { EmployeeEmergencyContact } from './EmployeeEmergencyContact';
 import { EmployeeSalary } from './EmployeeSalary';
 import { Employee } from './Employee';
 import { EmployeeUser } from './EmployeeUser';
+import { OfficeHour } from './OfficeHour';
 
 @Entity({ name: 'users' })
 export class User {
@@ -83,4 +84,7 @@ export class User {
 
   created_employee_user_bindings: EmployeeUser[];
   updated_employee_user_bindings: EmployeeUser[];
+
+  created_office_hours: OfficeHour[];
+  updated_office_hours: OfficeHour[];
 }

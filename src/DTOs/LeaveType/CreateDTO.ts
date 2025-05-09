@@ -23,7 +23,6 @@ export class CreateDTO {
   max_days_per_year: number;
 
   @IsNumber()
-  @IsPositive()
   @IsNotEmpty()
   carry_over_days: number;
 }

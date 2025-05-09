@@ -34,43 +34,43 @@ router.get('/', (request: Request, response: Response): void => {
   response.status(200).send('Hello World with TypeScript!');
 });
 
-router.post('/signup', commonValidation(UserRegisterDTO), userController.signup);
-router.post('/login', commonValidation(UserLoginDTO), userController.login);
-router.get('/verify/:token', userController.verify);
-router.post('/forgot-password', commonValidation(ForgotPasswordDTO), userController.forgotPassword);
-router.get('/reset-password/:token', userController.showResetForm);
-router.post('/reset-password/:token', commonValidation(PasswordResetDTO), userController.resetPassword);
-router.post('/logout', validateToken,  userController.logOut);
-router.get('/profile', validateToken,  userController.profile);
+router.post('/signup', commonValidation(UserRegisterDTO), userController.signup.bind(userController));
+router.post('/login', commonValidation(UserLoginDTO), userController.login.bind(userController));
+router.get('/verify/:token', userController.verify.bind(userController));
+router.post('/forgot-password', commonValidation(ForgotPasswordDTO), userController.forgotPassword.bind(userController));
+router.get('/reset-password/:token', userController.showResetForm.bind(userController));
+router.post('/reset-password/:token', commonValidation(PasswordResetDTO), userController.resetPassword.bind(userController));
+router.post('/logout', validateToken,  userController.logOut.bind(userController));
+router.get('/profile', validateToken,  userController.profile.bind(userController));
 
-router.get('/departments', validateToken, departmentController.index);
-router.post('/departments', validateToken, commonValidation(DeptCreateDTO), departmentController.store);
-router.get('/departments/view/:id', validateToken, departmentController.show);
-router.put('/departments/update/:id', validateToken, commonValidation(DeptUpdateDTO), departmentController.update);
-router.delete('/departments/delete/:id', validateToken, departmentController.delete);
+router.get('/departments', validateToken, departmentController.index.bind(departmentController));
+router.post('/departments', validateToken, commonValidation(DeptCreateDTO), departmentController.store.bind(departmentController));
+router.get('/departments/view/:id', validateToken, departmentController.show.bind(departmentController));
+router.put('/departments/update/:id', validateToken, commonValidation(DeptUpdateDTO), departmentController.update.bind(departmentController));
+router.delete('/departments/delete/:id', validateToken, departmentController.delete.bind(departmentController));
 
-router.get('/positions', validateToken, positionController.index);
-router.post('/positions', validateToken, commonValidation(PositionCreateDTO), positionController.store);
-router.get('/positions/view/:id', validateToken, positionController.show);
-router.put('/positions/update/:id', validateToken, commonValidation(PositionUpdateDTO), positionController.update);
-router.delete('/positions/delete/:id', validateToken, positionController.delete);
+router.get('/positions', validateToken, positionController.index.bind(positionController));
+router.post('/positions', validateToken, commonValidation(PositionCreateDTO), positionController.store.bind(positionController));
+router.get('/positions/view/:id', validateToken, positionController.show.bind(positionController));
+router.put('/positions/update/:id', validateToken, commonValidation(PositionUpdateDTO), positionController.update.bind(positionController));
+router.delete('/positions/delete/:id', validateToken, positionController.delete.bind(positionController));
 
-router.get('/position/salaries', validateToken, positionSalaryController.index);
-router.post('/position/salaries', validateToken, commonValidation(SalaryCreateDTO), positionSalaryController.store);
-router.get('/position/salaries/view/:id', validateToken, positionSalaryController.show);
-router.put("/position/salaries/update/:id", validateToken, commonValidation(SalaryUpdateDTO), positionSalaryController.update);
-router.delete('/position/salaries/delete/:id', validateToken, positionSalaryController.delete);
+router.get('/position/salaries', validateToken, positionSalaryController.index.bind(positionSalaryController));
+router.post('/position/salaries', validateToken, commonValidation(SalaryCreateDTO), positionSalaryController.store.bind(positionSalaryController));
+router.get('/position/salaries/view/:id', validateToken, positionSalaryController.show.bind(positionSalaryController));
+router.put("/position/salaries/update/:id", validateToken, commonValidation(SalaryUpdateDTO), positionSalaryController.update.bind(positionSalaryController));
+router.delete('/position/salaries/delete/:id', validateToken, positionSalaryController.delete.bind(positionSalaryController));
 
-router.get('/leave_types', validateToken, leaveTypeController.index);
-router.post('/leave_types', validateToken, commonValidation(LeaveTypeCreateDTO), leaveTypeController.store);
-router.get('/leave_types/view/:id', validateToken, leaveTypeController.show);
-router.put('/leave_types/update/:id', validateToken, commonValidation(LeaveTypeUpdateDTO), leaveTypeController.update);
-router.delete('/leave_types/delete/:id', validateToken, leaveTypeController.delete);
+router.get('/leave_types', validateToken, leaveTypeController.index.bind(leaveTypeController));
+router.post('/leave_types', validateToken, commonValidation(LeaveTypeCreateDTO), leaveTypeController.store.bind(leaveTypeController));
+router.get('/leave_types/view/:id', validateToken, leaveTypeController.show.bind(leaveTypeController));
+router.put('/leave_types/update/:id', validateToken, commonValidation(LeaveTypeUpdateDTO), leaveTypeController.update.bind(leaveTypeController));
+router.delete('/leave_types/delete/:id', validateToken, leaveTypeController.delete.bind(leaveTypeController));
 
-router.get('/employees', validateToken, employeeController.index);
-router.post('/employees', validateToken, commonValidation(EmployeeCreateDTO), employeeController.store);
-router.get('/employees/view/:id', validateToken, employeeController.show);
-router.put('/employees/update/:id', validateToken, commonValidation(EmployeeUpdateDTO), employeeController.update);
-router.delete('/employees/delete/:id', validateToken, employeeController.delete);
+router.get('/employees', validateToken, employeeController.index.bind(employeeController));
+router.post('/employees', validateToken, commonValidation(EmployeeCreateDTO), employeeController.store.bind(employeeController));
+router.get('/employees/view/:id', validateToken, employeeController.show.bind(employeeController));
+router.put('/employees/update/:id', validateToken, commonValidation(EmployeeUpdateDTO), employeeController.update.bind(employeeController));
+router.delete('/employees/delete/:id', validateToken, employeeController.delete.bind(employeeController));
 
 export default router;

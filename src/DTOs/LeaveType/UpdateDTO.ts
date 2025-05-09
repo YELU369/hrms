@@ -6,7 +6,6 @@ export class UpdateDTO {
 
   @IsString()
   @IsNotEmpty()
-  @Validate(UniqueValidator, [LeaveType, 'name'])
   name: string;
 
   @IsString()

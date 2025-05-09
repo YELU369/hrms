@@ -14,6 +14,9 @@ export class PositionSalary {
   @JoinColumn({ name: 'position_id' })
   position!: Position;
 
+  @Column()
+  position_id!: number;
+
   @Column({ type: 'integer' })
   min_salary!: number;
 

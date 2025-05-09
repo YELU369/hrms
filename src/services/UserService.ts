@@ -12,31 +12,38 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import { ServiceResult } from "@/ServiceResult";
 import { plainToInstance } from "class-transformer";
 import { UserProfileDTO } from "@/DTOs/UserProfileDTO";
-import { EntityManager } from "typeorm";
+import { EntityManager, FindOptionsWhere } from "typeorm";
+import { BaseService } from "./BaseService";
+import { UserRepository } from "@/repositories/UserRepository";
+import { BadRequestException } from "@/exceptions/BadRequestException";
+import { UnauthorizedException } from "@/exceptions/UnauthorizedException";
+import { ForbiddenException } from "@/exceptions/ForbiddenException";
+import { ServiceUnavailableException } from "@/exceptions/ServiceUnavailableException";
+import { NotFoundException } from "@/exceptions/NotFoundException";
 
-export class UserService {
+export class UserService extends BaseService<User> {
 
-  private static repo = AppDataSource.getRepository(User);
+  public repo: UserRepository;
+    
+  constructor() {
+    super(new UserRepository());
+  }
 
-  static async register(data: UserRegisterDTO, manager?: EntityManager) {
+  async register(data: UserRegisterDTO): Promise<UserProfileDTO> {
 
-    const repo = manager ? manager.getRepository(User) : this.repo;
-
-    const isExisted = await repo.exists({
-      where: {
-        name: data.name,
-        email: data.email,
-      }
+    const isExisted = await this.repo.exists({
+      name: data.name,
+      email: data.email,
     });
     
     if (isExisted) {
-      return ServiceResult.error('The user is already existed!', 400);
+      throw new BadRequestException('User already exists');
     }
 
     // Verify SMTP connection
     const isEmailServiceWorking = await EmailService.verifyConnection();
     if (!isEmailServiceWorking) {
-      return ServiceResult.error('Email service is not available. Please try again later.');
+      throw new ServiceUnavailableException('Email service is not available. Please try again later.');
     }
 
     const queryRunner = AppDataSource.createQueryRunner();
@@ -46,9 +53,7 @@ export class UserService {
 
       // Hash password and save user
       data.password = await bcrypt.hash(data.password, generalconfig.saltRounds);
-      const userRepository = repo;
-      const user = repo.create(data);
-      await userRepository.save(user);
+      const user = await this.repo.store(data);
 
       // Save verification record in email_verifications table
       const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -67,43 +72,36 @@ export class UserService {
       
       await queryRunner.commitTransaction();
 
-      return ServiceResult.success(
-        'You were successfully registered.', 
-        201, 
-        plainToInstance(UserProfileDTO, user, { excludeExtraneousValues: true })
-      );
+      return plainToInstance(UserProfileDTO, user, { excludeExtraneousValues: true });
 
-    } catch (error) {
+    } catch (exception) {
 
-      console.log('User Service - Registration: ', error);
+      console.log('User Service - Registration: ', exception);
       await queryRunner.rollbackTransaction();
-
-      return ServiceResult.error('Something went wrong. Please try again later!');
+      throw exception;
 
     } finally {
       await queryRunner.release()
     }
   }
 
-  static async login(data: UserLoginDTO) {
+  async login(data: UserLoginDTO): Promise<any> {
 
     try {
   
-      const user = await this.repo.findOne({
-        where: { email: data.email }
-      });
+      const user = await this.repo.findOneBy({ email: data.email });
   
       if (!user) {
-        return ServiceResult.error('Invalid credentials!', 401);
+        throw new UnauthorizedException('Invalid credentials');
       }
   
       const isPasswordValid = await bcrypt.compare(data.password, user.password);
       if (!isPasswordValid) {
-        return ServiceResult.error('Invalid credentials!', 401);
+        throw new UnauthorizedException('Invalid credentials');
       }
 
       if (!user.is_verified) {
-        return ServiceResult.error('Please verify your account first.', 401);
+        throw new ForbiddenException('Please verify your account first.');
       }
   
       // Generate JWT token
@@ -116,27 +114,23 @@ export class UserService {
         } as SignOptions
       );
       
-      return ServiceResult.success(
-        'You have successfully logged in.', 
-        200, 
-        {
-          token: token,
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-          }
+      return {
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
         }
-      );
+      };
   
-    } catch (error) {
+    } catch (exception) {
 
-      console.error("User Service Login Exception:", error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
+      console.error("User Service Login Exception:", exception);
+      throw exception;
     }
   }
 
-  static async verify(token: string) {
+  async verify(token: string): Promise<boolean> {
     
     try {
     
@@ -154,11 +148,11 @@ export class UserService {
                                 .getOne() as (EmailVerification & { user: User });
 
       if (!verification || !verification.user) {
-        return ServiceResult.error('Invalid or expired verification token.', 400);
+        throw new BadRequestException('Invalid or expired verification token.');
       }
     
       if (verification.expired_at < new Date()) {
-        return ServiceResult.error('Verification token has been already expired.', 400);
+        throw new BadRequestException('Verification token has been already expired.');
       }
     
       await AppDataSource.transaction(async (manager) => {
@@ -170,35 +164,31 @@ export class UserService {
         await manager.save(verification.user);
       });
       
-      return ServiceResult.success('You have successfully verified.');
+      return true;
 
-    } catch (error) {
+    } catch (exception) {
 
-      console.log('User Service Verify Data Access Exception: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later!');
+      console.log('User Service Verify Data Access Exception: ', exception);
+      throw exception;
     }
   }  
 
-  static async forgotPassword(email: string) {
-    
-    const userRepository = this.repo;
-
-    // Find user by email
-    const user = await userRepository.findOne({
-      where: { email: email }
-    });
-
-    if (!user) {
-      return ServiceResult.error('No account found with that email!', 404);
-    }
-
-    // Verify SMTP connection
-    const isEmailServiceWorking = await EmailService.verifyConnection();
-    if (!isEmailServiceWorking) {
-      return ServiceResult.error('Email service is not available. Please try again later.');
-    }
+  async forgotPassword(email: string): Promise<boolean> {
 
     try {
+
+      // Find user by email
+      const user = await this.repo.findOneBy({ email: email });
+
+      if (!user) {
+        throw new NotFoundException('No account found with that email!');
+      }
+
+      // Verify SMTP connection
+      const isEmailServiceWorking = await EmailService.verifyConnection();
+      if (!isEmailServiceWorking) {
+        throw new BadRequestException('Email service is not available. Please try again later.');
+      }
 
       // Save verification record in email_verifications table
       const resetToken = crypto.randomBytes(32).toString('hex');
@@ -215,94 +205,95 @@ export class UserService {
       // Send an email for password reset
       await EmailService.sendPasswordResetEmail(user.email, user.name, resetToken);
 
-      return ServiceResult.success('An email of password reset has been sent to you.');
+      return true;
 
-    } catch (error) {
+    } catch (exception) {
 
-      console.log('User Service - Forgot Password: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later!');
+      console.log('User Service - Forgot Password: ', exception);
+      throw exception;
     }
   }
 
-  static async checkResetTokenValidity(token: string) {
-
-    const userRepository = this.repo;
-
-    const result = await AppDataSource
-                        .getRepository(User)
-                        .createQueryBuilder('user')
-                        .innerJoin(
-                          EmailVerification,
-                          'verification',
-                          'verification.email = user.email AND verification.token = :token',
-                          { token }
-                        )
-                        .select([
-                          'user.id',
-                          'user.name',
-                          'user.email',
-                          'user.is_verified',
-                          'verification.expired_at'
-                        ])
-                        .getRawAndEntities();
-
-    const user = result.entities[0];
-    const expiredAt = result.raw[0]['verification_expired_at'];
-    
-    if (!user) {
-      return ServiceResult.error('The token is invalid.', 400);
-    }
-    
-    if (expiredAt < new Date()) {
-      return ServiceResult.error('The token has been already expired.', 400);
-    }
-
-    return ServiceResult.success('The token is still valid.', 200, {
-      user: user, 
-      expired_at: expiredAt
-    });
-  }
-
-  static async resetPassword(token: string, password: string): Promise<ServiceResult> {
-
-    const userRepository = this.repo;
-
-    const result = await this.checkResetTokenValidity(token);
-    
-    if (!result.success) {
-      return ServiceResult.error(result.message, result.code);
-    }
-    
-    const user = result.data.user;
+  async checkResetTokenValidity(token: string): Promise<User & any> {
 
     try {
+
+      const result = await AppDataSource
+                          .getRepository(User)
+                          .createQueryBuilder('user')
+                          .innerJoin(
+                            EmailVerification,
+                            'verification',
+                            'verification.email = user.email AND verification.token = :token',
+                            { token }
+                          )
+                          .select([
+                            'user.id',
+                            'user.name',
+                            'user.email',
+                            'user.is_verified',
+                            'verification.expired_at'
+                          ])
+                          .getRawAndEntities();
+
+      const user = result.entities[0];
+      const expiredAt = result.raw[0]['verification_expired_at'];
+      
+      if (!user) {
+        throw new BadRequestException('The token is invalid.');
+      }
+      
+      if (expiredAt < new Date()) {
+        throw new BadRequestException('The token has been already expired.');
+      }
+
+      return {
+        user: user, 
+        expired_at: expiredAt
+      };
+      
+    } catch (exception) {
+
+      console.log('User Service - Check Token Validity: ', exception);
+      throw exception;
+    }
+  }
+
+  async resetPassword(token: string, password: string): Promise<boolean> {
+
+    try {
+
+      const result = await this.checkResetTokenValidity(token);
+      const user = result.data.user;
   
       // Hash password and save user
       user.password = await bcrypt.hash(password, generalconfig.saltRounds);
-      await userRepository.save(user);
+      await this.repo.update(user.id, user);
       
-      return ServiceResult.success('You have reset your password successfully.');
+      return true;
 
-    } catch (error) {
+    } catch (exception) {
 
-      console.log('User Service - Reset Password: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
+      console.log('User Service - Reset Password: ', exception);
+      throw exception;
     }
   }
 
-  static async getProfileInfo(userId?: number): Promise<ServiceResult> {
+  async getProfileInfo(userId: number): Promise<UserProfileDTO> {
 
-    const repo = this.repo;
-    const user = await repo.findOne({
-      where: {
-        id: userId
-      }
-    });
+    try {
+      
+      const user = await this.repo.findOneBy({ id: userId });
+      return plainToInstance(UserProfileDTO, user, { excludeExtraneousValues: true });
 
-    return ServiceResult.success(
-      'User Profile Info', 
-      200, 
-      plainToInstance(UserProfileDTO, user, { excludeExtraneousValues: true })
-    );
+    } catch (exception) {
+
+      console.log('User Service - Get Profile Info ', exception);
+      throw exception;
+    }
+  }
+
+  async exists(fields: FindOptionsWhere<User>): Promise<boolean> {
+    return await this.repo.exists(fields);
   }
 }

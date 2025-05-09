@@ -5,117 +5,87 @@ import { UserLoginDTO } from "@/DTOs/UserLoginDTO";
 import { BlacklistedToken } from "@/entity/BlacklistedToken";
 import { AppDataSource } from "@/data-source";
 import { AuthRequest } from "@/middlewares/validateToken";
+import { BaseController } from "./BaseController";
+import { UserProfileDTO } from "@/DTOs/UserProfileDTO";
+import { ServiceResult } from "@/ServiceResult";
+import { Verify } from "crypto";
+import { User } from "@/entity/User";
+import { Timestamp } from "typeorm";
 
-export class UserController {
+export class UserController extends BaseController<UserRegisterDTO, UserProfileDTO> {
 
-  constructor() {}
+  constructor() {
+    super(new UserService());
+  }
 
   async signup(request: Request, response: Response): Promise<void> {
 
     const data: UserRegisterDTO = request.body;
-    const result = await UserService.register(data);
+    const result: UserProfileDTO = await this.service.register(data);
 
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
+    this.respond(response, ServiceResult.success('You were successfully registered.', 201, result));
   }
 
   async login(request: Request, response: Response): Promise<void> {
 
-    const data: UserLoginDTO = request.body;
-    const result = await UserService.login(data);
+    type LoginResult = {
+      token: string,
+      user: Partial<User>
+    };
 
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
+    const data: UserLoginDTO = request.body;
+    const result: LoginResult = await this.service.login(data);
+
+    this.respond(response, ServiceResult.success('You are successfully logged in.', 200, result));
   }
 
-  // Email verification
   async verify(request: Request, response: Response): Promise<void> {
-
+    
     const { token } = request.params;
-    const result = await UserService.verify(token);
+    await this.service.verify(token);
 
-    if (result.success) {
-
-      response.status(result.code).send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>HRMS</title>
-          </head>
-          <body>
-            <h1>${result.message} Please go to login.</h1>
-          </body>
-        </html>
-      `);
-
-    } else {
-      
-      response.status(result.code).send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>HRMS</title>
-          </head>
-          <body>
-            <h1>${result.message}</h1>
-          </body>
-        </html>
-      `);
-    }
+    response.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>HRMS</title>
+        </head>
+        <body>
+          <h1>Verification was successful. Please go to login.</h1>
+        </body>
+      </html>
+    `);
   }
   
-  // Forgot password
   async forgotPassword(request: Request, response: Response): Promise<void> {
-    const { email } = request.body;
-    const result = await UserService.forgotPassword(email);
 
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
+    const { email } = request.body;
+    const result: boolean = await this.service.forgotPassword(email);
+
+    this.respond(response, ServiceResult.success('An email of password reset has been sent to you.'));
   }
 
-  // Show password reset form
   async showResetForm(request: Request, response: Response): Promise<void> {
 
+    type TokenValidationResult = {
+      user: Partial<User>, 
+      expired_at: Timestamp
+    };
+
     const { token } = request.params;
-    const result = await UserService.checkResetTokenValidity(token);
+    const result: TokenValidationResult = await this.service.checkResetTokenValidity(token);
 
-    if (result.success) {
-
-      response.send(`
-        <form action="/reset-password/${token}" method="POST">
-          <label>New Password:</label>
-          <input type="password" name="password" required />
-          <br />
-          <label>Confirm Password:</label>
-          <input type="password" name="confirmed_password" required />
-          <br />
-          <button type="submit">Reset Password</button>
-        </form>
-      `);
-
-    } else {
-
-      response.status(result.code).send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>HRMS</title>
-          </head>
-          <body>
-            <h1>${result.message}</h1>
-          </body>
-        </html>
-      `);
-    }
+    response.send(`
+      <form action="/reset-password/${token}" method="POST">
+        <label>New Password:</label>
+        <input type="password" name="password" required />
+        <br />
+        <label>Confirm Password:</label>
+        <input type="password" name="confirmed_password" required />
+        <br />
+        <button type="submit">Reset Password</button>
+      </form>
+    `);
   }
   
   // Reset password
@@ -124,39 +94,21 @@ export class UserController {
     const { token } = request.params;
     const { password } = request.body;
 
-    const result = await UserService.resetPassword(token, password);
+    const result: boolean = await this.service.resetPassword(token, password);
 
-    if (result.success) {
-
-      response.status(result.code).send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>HRMS</title>
-          </head>
-          <body>
-            <h1>${result.message}</h1>
-          </body>
-        </html>
-      `);
-
-    } else {
-
-      response.status(result.code).send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>HRMS</title>
-          </head>
-          <body>
-            <h1>${result.message}</h1>
-          </body>
-        </html>
-      `);
-    }
+    response.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>HRMS</title>
+        </head>
+        <body>
+          <h1>You have reset your password successfully.</h1>
+        </body>
+      </html>
+    `);
   }
 
-  // Log Out
   async logOut(request: Request, response: Response): Promise<void> {
 
     const token = request.header('Authorization')?.replace('Bearer ', '');
@@ -182,10 +134,9 @@ export class UserController {
         data: null,
       });
 
-    } catch (error) {
+    } catch (exception) {
 
-      console.error('Error blacklisting token:', error);
-
+      console.error('Error blacklisting token:', exception);
       response.status(500).json({
         success: false,
         message: 'Something went wrong. Please try again later!',
@@ -197,12 +148,8 @@ export class UserController {
   async profile(request: AuthRequest, response: Response): Promise<void> {
 
     const userId = request.user_id;
-    const result = await UserService.getProfileInfo(request.user_id);
+    const result: UserProfileDTO = await this.service.getProfileInfo(request.user_id);
 
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
+    this.respond(response, ServiceResult.success('User Profile', 200, result));
   }
 }

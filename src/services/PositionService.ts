@@ -1,189 +1,56 @@
-import { AppDataSource } from "@/data-source";
-import { CreateDTO as PositionCreateDTO } from "@/DTOs/Position/CreateDTO";
-import { UpdateDTO as PositionUpdateDTO } from "@/DTOs/Position/UpdateDTO";
-import { Department } from "@/entity/Department";
+import { BaseService } from "@/services/BaseService";
 import { Position } from "@/entity/Position";
+import { PositionRepository, PositionSearchParams } from "@/repositories/PositionRepository";
+import { PaginationResult } from "@/helpers/Paginator";
+import { FindManyOptions } from "typeorm";
 import { User } from "@/entity/User";
-import { PaginationResult, Paginator } from "@/helpers/Paginator";
-import { QueryBuilderWrapper } from "@/helpers/QueryBuilderWrapper";
-import { ServiceResult } from "@/ServiceResult";
 
-export interface PositionListType {
-  code: number,
-  success: boolean,
-  message: string,
-  data: PaginationResult<Position>[],
-}
+export class PositionService extends BaseService<Position> {
 
-export interface PositionSearchParams {
-  keyword?: string, 
-  department_id?: number, 
-  is_manager?: boolean
-}
+  public repo: PositionRepository;
 
-export class PositionService {
+  constructor() {
+    super(new PositionRepository());
+  }
 
-  private static repo = AppDataSource.getRepository(Position);
-  private static userRepo = AppDataSource.getRepository(User);
-  private static deptRepo = AppDataSource.getRepository(Department);
+  async getList(searchParams: PositionSearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<Position>> {
+    return await this.repo.getList(searchParams, page, limit);
+  }
 
-  static async getList(searchParams: PositionSearchParams = {}, page: number = 0, limit: number = 100): Promise<PositionListType> {
+  async getAll(options: FindManyOptions<Position> = {}): Promise<Position[]> {
+    return await this.repo.getAll(options);
+  }
 
-    const baseQuery = this.repo.createQueryBuilder('position')
-                    .innerJoin('position.department', 'department')
-                    .leftJoin('position.updated_by', 'updater')
-                    .select([
-                      'position.id', 
-                      'position.title', 
-                      'position.description', 
-                      'position.is_manager', 
-                      'position.updated_at', 
-                      'department.id', 
-                      'department.name', 
-                      'updater.id', 
-                      'updater.name'
-                    ]);
-
-    const wrapper = new QueryBuilderWrapper(baseQuery)
-                    .when(!!searchParams.keyword, query =>
-                      query.andWhere('position.title LIKE :keyword', { keyword: `%${searchParams.keyword}%` })
-                        .orWhere('position.description LIKE :keyword', { keyword: `%${searchParams.keyword}%` })
-                    )
-                    .when(!!searchParams.department_id, query =>
-                      query.andWhere('position.department_id = :department_id', { department_id: `${searchParams.department_id}` })
-                    )
-                    .when(!!searchParams.is_manager, query =>
-                      query.andWhere('position.is_manager = :is_manager', { is_manager: `${searchParams.is_manager}` })
-                    );
-
-    const paginator = new Paginator(wrapper.getQuery(), page, limit);
-    const result = await paginator.paginate();
+  async getById(id: number, relations: string[] = ['department', 'salaries', 'employees', 'created_by', 'updated_by']): Promise<Position> {
     
-    return ServiceResult.success('Positions List', 200, result);
+    const result = await this.repo.getById(id, relations);
+
+    if (result.created_by) {
+      result.created_by = {
+        id: result.created_by.id,
+        name: result.created_by.name,
+      } as User;
+    }
+
+    if (result.updated_by) {
+      result.updated_by = {
+        id: result.updated_by.id,
+        name: result.updated_by.name,
+      } as User;
+    }
+
+    return result;
   }
 
-  static async create(data: PositionCreateDTO, userId: number): Promise<ServiceResult> {
-
-    try {
-
-      const user = await this.userRepo.findOneBy({ id: userId });
-      if (!user) {
-        return ServiceResult.error('Invalid user!', 403);
-      }
-
-      const department = await this.deptRepo.findOneBy({ id: data.department_id });
-      if (!department) {
-        return ServiceResult.error('Invalid department!', 403);
-      }
-
-      const position = this.repo.create({
-        title: data.title,
-        is_manager: data.is_manager,
-        description: data.description,
-        department: department,
-        created_by: user,
-        updated_by: user,
-      });
-
-      await this.repo.save(position);
-
-      return ServiceResult.success('Position was successfully stored.', 201);
-
-    } catch (error) {
-
-      console.log('Position Service - Create: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
-    }
+  async store(data: Partial<Position>, userId: number): Promise<Position> {
+    return await this.repo.store(data, userId);
   }
 
-  static async getDetailInfo(id: number): Promise<ServiceResult> {
-
-    try {
-      
-      const position = await this.repo.createQueryBuilder('position')
-                                      .innerJoin('position.department', 'department')
-                                      .leftJoin('position.updated_by', 'updater')
-                                      .select([
-                                        'position.id', 
-                                        'position.title', 
-                                        'position.description', 
-                                        'position.is_manager', 
-                                        'position.updated_at', 
-                                        'department.id', 
-                                        'department.name', 
-                                        'updater.id', 
-                                        'updater.name'
-                                      ])
-                                      .where('position.id = :id', { id: id })
-                                      .getOne();
-      if (!position) {
-        return ServiceResult.error('Position not found!', 404);
-      }
-  
-      return ServiceResult.success('Position Show', 200, position);
-
-    } catch (error) {
-
-      console.log('Position Service - View: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
-    }
+  async update(id: number, data: Partial<Position>, userId: number): Promise<Position> {
+    return await this.repo.update(id, data, userId);
   }
 
-  static async update(id: number, userId: number, data: PositionUpdateDTO): Promise<ServiceResult> {
-
-    try {
-
-      const position = await this.repo.findOneBy({ id: id });
-      if (!position) {
-        return ServiceResult.error('Position not found!', 404);
-      }
-
-      const department = await this.deptRepo.findOneBy({ id: data.department_id });
-      if (!department) {
-        return ServiceResult.error('Department not found!', 404);
-      }
-
-      const user = await this.userRepo.findOneBy({ id: userId });
-      if (!user) {
-        return ServiceResult.error('Invalid user!', 403);
-      }
-
-      position.title = data.title ?? position.title;
-      position.is_manager = data.is_manager ?? position.is_manager;
-      position.description = data.description ?? position.description;
-      position.department = department;
-      position.updated_by = user;
-
-      await this.repo.save(position);
-      return ServiceResult.success('Position was successfully updated.');
-
-    } catch (error) {
-      
-      console.log('Position Service - Update: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
-    }
-  }
-
-  static async delete(id: number): Promise<ServiceResult> {
-
-    try {
-
-      const position = await this.repo.findOne({
-        where: { id: id }
-      });
-  
-      if (!position) {
-        return ServiceResult.error('Position not found!', 404);
-      }
-      
-      await this.repo.remove(position);
-
-      return ServiceResult.success('Position was successfully deleted.');
-
-    } catch (error) {
-
-      console.log('Position Service - Delete: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
-    }
+  async delete(id: number): Promise<boolean> {
+    return await this.repo.delete(id);
   }
 }

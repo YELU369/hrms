@@ -1,182 +1,40 @@
-import { AppDataSource } from "@/data-source";
-import { CreateDTO as SalaryCreateDTO } from "@/DTOs/Position/Salary/CreateDTO";
-import { UpdateDTO as SalaryUpdateDTO } from "@/DTOs/Position/Salary/UpdateDTO";
-import { Department } from "@/entity/Department";
-import { Position } from "@/entity/Position";
+import { BaseService } from "@/services/BaseService";
 import { PositionSalary } from "@/entity/PositionSalary";
+import { PositionSalaryRepository, PositionSalarySearchParams } from "@/repositories/PositionSalaryRepository";
+import { PaginationResult } from "@/helpers/Paginator";
+import { FindManyOptions } from "typeorm";
 import { User } from "@/entity/User";
-import { PaginationResult, Paginator } from "@/helpers/Paginator";
-import { QueryBuilderWrapper } from "@/helpers/QueryBuilderWrapper";
-import { ServiceResult } from "@/ServiceResult";
 
-export interface PositionSalaryListType {
-  code: number,
-  success: boolean,
-  message: string,
-  data: PaginationResult<Position>[],
-}
+export class PositionSalaryService extends BaseService<PositionSalary> {
 
-export interface PositionSalarySearchParams {
-  position_id?: number, 
-}
+  public repo: PositionSalaryRepository;
 
-export class PositionSalaryService {
-
-  private static repo = AppDataSource.getRepository(PositionSalary);
-  private static userRepo = AppDataSource.getRepository(User);
-  private static positionRepo = AppDataSource.getRepository(Position);
-  private static deptRepo = AppDataSource.getRepository(Department);
-
-  static async getList(searchParams: PositionSalarySearchParams = {}, page: number = 0, limit: number = 100): Promise<PositionSalaryListType> {
-
-    const baseQuery = this.repo.createQueryBuilder('salary')
-                    .innerJoin('salary.position', 'position')
-                    .leftJoin('salary.updated_by', 'updater')
-                    .select([
-                      'salary.id', 
-                      'salary.min_salary', 
-                      'salary.max_salary', 
-                      'salary.start_from', 
-                      'salary.updated_at', 
-                      'position.id', 
-                      'position.title', 
-                      'updater.id', 
-                      'updater.name'
-                    ]);
-
-    const wrapper = new QueryBuilderWrapper(baseQuery)
-                    .when(!!searchParams.position_id, query =>
-                      query.andWhere('salary.position_id = :position_id', { position_id: `${searchParams.position_id}` })
-                    );
-
-    const paginator = new Paginator(wrapper.getQuery(), page, limit);
-    const result = await paginator.paginate();
-
-    return ServiceResult.success('Position Salaries List', 200, result);
+  constructor() {
+    super(new PositionSalaryRepository());
   }
 
-  static async create(data: SalaryCreateDTO, userId: number): Promise<ServiceResult> {
-
-    try {
-
-      const user = await this.userRepo.findOneBy({ id: userId });
-      if (!user) {
-        return ServiceResult.error('Invalid user!', 403);
-      }
-
-      const position = await this.positionRepo.findOneBy({ id: data.position_id });
-      if (!position) {
-        return ServiceResult.error('Invalid position!', 403);
-      }
-
-      const Position = this.repo.create({
-        min_salary: data.min_salary,
-        max_salary: data.max_salary,
-        start_from: data.start_from,
-        position: position,
-        created_by: user,
-        updated_by: user,
-      });
-
-      await this.repo.save(Position);
-
-      return ServiceResult.success('Salary was successfully stored.', 201);
-
-    } catch (error) {
-
-      console.log('Position Salary Service - Create: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
-    }
+  async getList(searchParams: PositionSalarySearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<PositionSalary>> {
+    return await this.repo.getList(searchParams, page, limit);
   }
 
-  static async getDetailInfo(id: number): Promise<ServiceResult> {
+  async getById(id: number, relations: string[] = ['position', 'created_by', 'updated_by']): Promise<PositionSalary> {
+    
+    const result = await super.getById(id, relations);
 
-    try {
-      
-      const salary = await this.repo.createQueryBuilder('salary')
-                                      .innerJoin('salary.position', 'position')
-                                      .leftJoin('salary.updated_by', 'updater')
-                                      .select([
-                                        'salary.id', 
-                                        'salary.min_salary', 
-                                        'salary.max_salary', 
-                                        'salary.start_from', 
-                                        'salary.updated_at', 
-                                        'position.id', 
-                                        'position.title', 
-                                        'updater.id', 
-                                        'updater.name'
-                                      ])
-                                      .where('salary.id = :id', { id: id })
-                                      .getOne();
-      if (!salary) {
-        return ServiceResult.error('Salary not found!', 404);
-      }
-  
-      return ServiceResult.success('Position Salary Show', 200, salary);
-
-    } catch (error) {
-
-      console.log('Position Salary Service - View: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
+    if (result.created_by) {
+      result.created_by = {
+        id: result.created_by.id,
+        name: result.created_by.name,
+      } as User;
     }
-  }
 
-  static async update(id: number, userId: number, data: SalaryUpdateDTO): Promise<ServiceResult> {
-
-    try {
-
-      const salary = await this.repo.findOneBy({ id: id });
-      if (!salary) {
-        return ServiceResult.error('Salary not found!', 404);
-      }
-
-      const position = await this.positionRepo.findOneBy({ id: data.position_id });
-      if (!position) {
-        return ServiceResult.error('Position not found!', 404);
-      }
-
-      const user = await this.userRepo.findOneBy({ id: userId });
-      if (!user) {
-        return ServiceResult.error('Invalid user!', 403);
-      }
-
-      salary.min_salary = data.min_salary ?? salary.min_salary;
-      salary.max_salary = data.max_salary ?? salary.max_salary;
-      salary.start_from = data.start_from ?? salary.start_from;
-      salary.position = position;
-      salary.updated_by = user;
-
-      await this.repo.save(salary);
-      return ServiceResult.success('Salary was successfully updated.');
-
-    } catch (error) {
-      
-      console.log('Position Salary Service - Update: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
+    if (result.updated_by) {
+      result.updated_by = {
+        id: result.updated_by.id,
+        name: result.updated_by.name,
+      } as User;
     }
-  }
 
-  static async delete(id: number): Promise<ServiceResult> {
-
-    try {
-
-      const salary = await this.repo.findOne({
-        where: { id: id }
-      });
-  
-      if (!salary) {
-        return ServiceResult.error('Salary not found!', 404);
-      }
-      
-      await this.repo.remove(salary);
-
-      return ServiceResult.success('Position was successfully deleted.');
-
-    } catch (error) {
-
-      console.log('Position Salary Service - Delete: ', error);
-      return ServiceResult.error('Something went wrong. Please try again later.');
-    }
+    return result;
   }
 }

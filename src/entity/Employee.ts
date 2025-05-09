@@ -13,6 +13,7 @@ import { EmployeeEmergencyContact } from './EmployeeEmergencyContact';
 import { EmployeeSalary } from './EmployeeSalary';
 import { User } from './User';
 import { EmployeeUser } from './EmployeeUser';
+import { EmployeeWorkSchedule } from './EmployeeWorkSchedule';
 
 @Entity({ name: 'employees' })
 export class Employee {
@@ -35,6 +36,9 @@ export class Employee {
   @ManyToOne(() => Position, position => position.employees, { nullable: false })
   @JoinColumn({ name: 'position_id' })
   position: Position;
+
+  @Column()
+  position_id: number;
 
   @Column()
   phone!: string;
@@ -78,9 +82,6 @@ export class Employee {
   @OneToMany(() => DepartmentManager, manager => manager.employee)
   managed_departments!: DepartmentManager[];
 
-  @OneToMany(() => WorkSchedule, schedule => schedule.employee)
-  work_schedules!: WorkSchedule[];
-
   @OneToMany(() => CheckInRecord, checkIn => checkIn.employee)
   check_in_records!: CheckInRecord[];
 
@@ -98,4 +99,8 @@ export class Employee {
 
   @OneToOne(() => EmployeeUser, userBinding => userBinding.employee)
   userBinding!: EmployeeUser[];
+
+  @OneToOne(() => EmployeeWorkSchedule, scheduleBinding => scheduleBinding.employee)
+  @JoinColumn({ name: 'employee_id' })
+  scheduleBinding!: EmployeeWorkSchedule[];
 }

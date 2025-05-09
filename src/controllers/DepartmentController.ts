@@ -1,75 +1,11 @@
-import { CreateDTO as DeptCreateDTO } from "@/DTOs/Department/CreateDTO";
-import { UpdateDTO as DeptUpdateDTO } from "@/DTOs/Department/UpdateDTO";
-import { AuthRequest } from "@/middlewares/validateToken";
+import { CreateDTO as DepartmentCreateDTO } from "@/DTOs/Department/CreateDTO";
+import { UpdateDTO as DepartmentUpdateDTO } from "@/DTOs/Department/UpdateDTO";
 import { DepartmentService } from "@/services/DepartmentService";
-import { Response } from "express";
+import { BaseController } from "@/controllers/BaseController";
 
-export class DepartmentController {
+export class DepartmentController extends BaseController<DepartmentCreateDTO, DepartmentUpdateDTO> {
 
-  async index(request: AuthRequest, response: Response): Promise<void> {
-
-    const page = parseInt(request.query.page as string) || 1;
-    const limit = parseInt(request.query.limit as string) || 10;
-
-    const result = await DepartmentService.getList(request.query, page, limit);
-
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
-  }
-
-  async store(request: AuthRequest, response: Response): Promise<void> {
-
-    const data: DeptCreateDTO = request.body;
-    const userId = Number(request.user_id);
-
-    const result = await DepartmentService.create(data, userId);
-
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
-  }
-
-  async show(request: AuthRequest, response: Response): Promise<void> {
-
-    const { id } = request.params;
-    const result = await DepartmentService.getDetailInfo(parseInt(id));
-
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
-  }
-
-  async update(request: AuthRequest, response: Response): Promise<void> {
-
-    const { id } = request.params;
-    const data: DeptUpdateDTO = request.body;
-    const userId = Number(request.user_id);
-
-    const result = await DepartmentService.update(parseInt(id), userId, data);
-
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
-  }
-
-  async delete(request: AuthRequest, response: Response): Promise<void> {
-
-    const { id } = request.params;
-    const result = await DepartmentService.delete(parseInt(id));
-
-    response.status(result.code).json({
-      success: result.success,
-      message: result.message,
-      data: result.data,
-    });
+  constructor() {
+    super(new DepartmentService());
   }
 }

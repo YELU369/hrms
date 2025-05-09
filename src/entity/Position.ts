@@ -14,6 +14,9 @@ export class Position {
   @JoinColumn({ name: 'department_id' })
   department!: Department;
 
+  @Column()
+  department_id!: number;
+
   @Column({ unique: true})
   title!: string;
 

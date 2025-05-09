@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColum
 import { User } from './User';
 import { WorkScheduleDetail } from './WorkScheduleDetail';
 import { Employee } from './Employee';
+import { EmployeeWorkSchedule } from './EmployeeWorkSchedule';
 
 @Entity({ name: 'work_schedules' })
 @Unique(['start_from', 'employee'])
@@ -9,10 +10,6 @@ export class WorkSchedule {
   
   @PrimaryGeneratedColumn()
   id!: number;
-
-  @ManyToOne(() => Employee, employee => employee.work_schedules)
-  @JoinColumn({ name: 'employee_id' })
-  employee!: Employee;
 
   @Column({ type: 'date' })
   start_from!: Date;
@@ -36,4 +33,8 @@ export class WorkSchedule {
   @ManyToOne(() => User, user => user.updated_work_schedules, { nullable: false })
   @JoinColumn({ name: 'updated_by' })
   updated_by!: User;
+  
+  @OneToMany(() => EmployeeWorkSchedule, scheduleBindings => scheduleBindings.schedule)
+  @JoinColumn({ name: 'work_schedule_id' })
+  scheduleBindings!: EmployeeWorkSchedule[];
 }

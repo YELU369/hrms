@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import routes from './routes';
+import { HttpException } from './exceptions/HttpException';
 
 // Get port with fallback
 const port: number = parseInt(process.env.PORT || '3000', 10);
@@ -34,11 +35,33 @@ app.use("/", routes);
 
 // Error handling middleware
 app.use((error: Error, request: Request, response: Response, next: NextFunction) => {
+
   console.error(error);
-  response.status(500).json({
-    status: 'error',
-    message: 'Internal Server Error',
-  });
+
+  const isJson = request.accepts('json');
+  const status = error instanceof HttpException ? error.status : 500;
+  const message = error.message || 'Internal Server Error';
+  
+  if (isJson) {
+
+    response.status(status).json({
+      success: false,
+      message,
+    });
+
+  } else {
+
+    response.status(status).send(`
+      <html>
+        <head>
+          <title>${status} - Error</title>
+        </head>
+        <body>
+          <h1>${status} - ${message}</h1>
+        </body>
+      </html>
+    `);
+  }
 });
 
 // Server startup
