@@ -28,9 +28,15 @@ export class DepartmentManager {
 
   @ManyToOne(() => User, user => user.created_department_managers, { nullable: false })
   @JoinColumn({ name: 'created_by' })
-  created_by!: User;
+  creator!: Partial<User>;
 
   @ManyToOne(() => User, user => user.updated_department_managers, { nullable: false })
   @JoinColumn({ name: 'updated_by' })
-  updated_by!: User;
+  updater!: Partial<User>;
+
+  @Column()
+  created_by!: number;
+
+  @Column()
+  updated_by!: number;
 }

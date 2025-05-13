@@ -18,9 +18,13 @@ import { CreateDTO as LeaveTypeCreateDTO } from './DTOs/LeaveType/CreateDTO';
 import { UpdateDTO as LeaveTypeUpdateDTO } from './DTOs/LeaveType/UpdateDTO';
 import { CreateDTO as EmployeeCreateDTO } from "@/DTOs/Employee/CreateDTO";
 import { UpdateDTO as EmployeeUpdateDTO } from "@/DTOs/Employee/UpdateDTO";
+import { CreateDTO as WorkScheduleCreateDTO } from "@/DTOs/WorkSchedule/CreateDTO";
+import { UpdateDTO as WorkScheduleUpdateDTO } from "@/DTOs/WorkSchedule/UpdateDTO";
 import { PositionSalaryController } from './controllers/PositionSalaryController';
 import { LeaveTypeController } from './controllers/LeaveTypeController';
 import { EmployeeController } from './controllers/EmployeeController';
+import { OfficeHourController } from './controllers/OfficeHourController';
+import { WorkScheduleController } from './controllers/WorkScheduleController';
 
 const router = Router();
 const userController = new UserController();
@@ -29,6 +33,8 @@ const positionController = new PositionController();
 const positionSalaryController = new PositionSalaryController();
 const leaveTypeController = new LeaveTypeController();
 const employeeController = new EmployeeController();
+const officeHourController = new OfficeHourController();
+const workScheduleController = new WorkScheduleController();
 
 router.get('/', (request: Request, response: Response): void => {
   response.status(200).send('Hello World with TypeScript!');
@@ -72,5 +78,15 @@ router.post('/employees', validateToken, commonValidation(EmployeeCreateDTO), em
 router.get('/employees/view/:id', validateToken, employeeController.show.bind(employeeController));
 router.put('/employees/update/:id', validateToken, commonValidation(EmployeeUpdateDTO), employeeController.update.bind(employeeController));
 router.delete('/employees/delete/:id', validateToken, employeeController.delete.bind(employeeController));
+
+router.get('/office_hours', validateToken, officeHourController.index.bind(officeHourController));
+router.get('/office_hours/view/:id', validateToken, officeHourController.show.bind(officeHourController));
+
+router.get('/work_schedules', validateToken, workScheduleController.index.bind(workScheduleController));
+router.post('/work_schedules', validateToken, commonValidation(WorkScheduleCreateDTO), workScheduleController.store.bind(workScheduleController));
+router.post('/work_schedules/with-details', validateToken, commonValidation(WorkScheduleCreateDTO), workScheduleController.storeWithDetail.bind(workScheduleController));
+router.get('/work_schedules/view/:id', validateToken, workScheduleController.show.bind(workScheduleController));
+router.put('/work_schedules/update/:id', validateToken, commonValidation(WorkScheduleUpdateDTO), workScheduleController.update.bind(workScheduleController));
+router.delete('/work_schedules/delete/:id', validateToken, workScheduleController.delete.bind(workScheduleController));
 
 export default router;

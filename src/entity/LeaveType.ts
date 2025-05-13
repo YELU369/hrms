@@ -32,11 +32,17 @@ export class LeaveType {
 
   @ManyToOne(() => User, user => user.created_leave_types, { nullable: false })
   @JoinColumn({ name: 'created_by' })
-  created_by!: User;
+  creator!: Partial<User>;
 
   @ManyToOne(() => User, user => user.updated_leave_types, { nullable: false })
   @JoinColumn({ name: 'updated_by' })
-  updated_by!: User;
+  updater!: Partial<User>;
+
+  @Column()
+  created_by!: number;
+
+  @Column()
+  updated_by!: number;
 
   @OneToMany(() => LeaveBalance, balance => balance.leave_type)
   balances!: LeaveBalance[];

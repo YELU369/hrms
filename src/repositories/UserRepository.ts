@@ -2,6 +2,7 @@ import { BaseRepository } from "@/repositories/BaseRepository";
 import { User } from "@/entity/User";
 import { PaginationResult, Paginator } from "@/helpers/Paginator";
 import { QueryBuilderWrapper } from "@/helpers/QueryBuilderWrapper";
+import { EntityManager } from "typeorm";
 
 export interface UserSearchParams {
   keyword?: string, 
@@ -10,8 +11,10 @@ export interface UserSearchParams {
 
 export class UserRepository extends BaseRepository<User> {
   
-  constructor() {
-    super(User);
+  public manager: EntityManager;
+
+  constructor(manager?: EntityManager) {
+    super(User, manager);
   }
 
   async getList(searchParams: UserSearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<User>> {

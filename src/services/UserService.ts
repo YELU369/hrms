@@ -24,9 +24,10 @@ import { NotFoundException } from "@/exceptions/NotFoundException";
 export class UserService extends BaseService<User> {
 
   public repo: UserRepository;
+  public manager: EntityManager;
     
-  constructor() {
-    super(new UserRepository());
+  constructor(manager?: EntityManager) {
+    super(new UserRepository(manager));
   }
 
   async register(data: UserRegisterDTO): Promise<UserProfileDTO> {

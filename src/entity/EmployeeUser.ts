@@ -32,9 +32,15 @@ export class EmployeeUser {
 
   @ManyToOne(() => User, user => user.created_position_salaries, { nullable: false })
   @JoinColumn({ name: 'created_by' })
-  created_by!: User;
+  creator!: Partial<User>;
 
   @ManyToOne(() => User, user => user.updated_position_salaries, { nullable: false })
   @JoinColumn({ name: 'updated_by' })
-  updated_by!: User;
+  updater!: Partial<User>;
+
+  @Column()
+  created_by!: number;
+
+  @Column()
+  updated_by!: number;
 }

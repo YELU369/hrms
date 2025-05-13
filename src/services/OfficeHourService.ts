@@ -1,25 +1,25 @@
 import { BaseService } from "@/services/BaseService";
-import { LeaveType } from "@/entity/LeaveType";
-import { LeaveTypeRepository, LeaveTypeSearchParams } from "@/repositories/LeaveTypeRepository";
-import { PaginationResult } from "@/helpers/Paginator";
-import { EntityManager, FindManyOptions } from "typeorm";
+import { OfficeHour } from "@/entity/OfficeHour";
+import { OfficeHourRepository } from "@/repositories/OfficeHourRepository";
 import { User } from "@/entity/User";
+import { PaginationResult } from "@/helpers/Paginator";
+import { EntityManager } from "typeorm";
 import { UserService } from "./UserService";
 
-export class LeaveTypeService extends BaseService<LeaveType> {
+export class OfficeHourService extends BaseService<OfficeHour> {
 
-  public repo: LeaveTypeRepository;
+  public repo: OfficeHourRepository;
   public manager: EntityManager;
 
   constructor(manager?: EntityManager) {
-    super(new LeaveTypeRepository(manager));
+    super(new OfficeHourRepository(manager));
   }
 
-  async getList(searchParams: LeaveTypeSearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<LeaveType>> {
-    return await this.repo.getList(searchParams, page, limit);
+  async getList(page: number = 0, limit: number = 100): Promise<PaginationResult<OfficeHour>> {
+    return await this.repo.getList(page, limit);
   }
 
-  async getById(id: number, fields: string[] = [], relations: string[] = ['creator', 'updater']): Promise<Partial<LeaveType>> {
+  async getById(id: number, fields: string[] = [], relations: string[] = ['creator', 'updater']): Promise<Partial<OfficeHour>> {
     
     const result = await super.getById(id, fields, []);
     

@@ -1,30 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique, OneToOne } from 'typeorm';
 import { Position } from './Position';
 import { User } from './User';
+import { Employee } from './Employee';
+import { WorkSchedule } from './WorkSchedule';
 
-@Entity({ name: 'position_salaries' })
-@Unique(['min_salary', 'start_from', 'position'])
-@Unique(['max_salary', 'start_from', 'position'])
-export class PositionSalary {
+@Entity({ name: 'employee_work_schedules' })
+export class EmployeeWorkSchedule {
   
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Position, position => position.salaries)
-  @JoinColumn({ name: 'position_id' })
-  position!: Position;
+  @OneToOne(() => Employee, employee => employee.scheduleBinding)
+  @JoinColumn({ name: 'employee_id' })
+  employee!: Employee;
+
+  @Column({ unique: true})
+  employee_id: number;
+
+  @OneToOne(() => WorkSchedule, schedule => schedule.scheduleBindings)
+  @JoinColumn({ name: 'work_schedule_id' })
+  schedule!: WorkSchedule;
 
   @Column()
-  position_id!: number;
-
-  @Column({ type: 'integer' })
-  min_salary!: number;
-
-  @Column({ type: 'integer' })
-  max_salary!: number;
-
-  @Column({ type: 'date' })
-  start_from!: Date;
+  work_schedule_id: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at!: Date;

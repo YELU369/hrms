@@ -2,39 +2,37 @@ import { BaseService } from "@/services/BaseService";
 import { Department } from "@/entity/Department";
 import { DepartmentRepository, DepartmentSearchParams } from "@/repositories/DepartmentRepository";
 import { PaginationResult } from "@/helpers/Paginator";
-import { FindManyOptions } from "typeorm";
-import { User } from "@/entity/User";
+import { EntityManager, FindManyOptions } from "typeorm";
+import { UserService } from "./UserService";
 
 export class DepartmentService extends BaseService<Department> {
 
   public repo: DepartmentRepository;
+  public manager: EntityManager;
 
-  constructor() {
-    super(new DepartmentRepository());
+  constructor(manager?: EntityManager) {
+    super(new DepartmentRepository(manager));
   }
 
   async getList(searchParams: DepartmentSearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<Department>> {
     return await this.repo.getList(searchParams, page, limit);
   }
 
-  async getById(id: number, relations: string[] = ['created_by', 'updated_by']): Promise<Department> {
+  async getById(id: number, fields: string[] = [], relations: string[] = ['creator', 'updater']): Promise<Partial<Department>> {
 
-    const result = await super.getById(id, relations);
-    
-    if (result.created_by) {
-      result.created_by = {
-        id: result.created_by.id,
-        name: result.created_by.name,
-      } as User;
-    }
+    const result = await super.getById(id, fields, []);
 
-    if (result.updated_by) {
-      result.updated_by = {
-        id: result.updated_by.id,
-        name: result.updated_by.name,
-      } as User;
+    if (relations.includes('creator') && result.created_by != null) {
+      const userService = new UserService();
+      result.creator = await userService.getById(result.created_by, ['id', 'name'], []);
     }
-    
-    return result;
+  
+    if (relations.includes('updater') && result.updated_by != null) {
+      const userService = new UserService();
+      result.updater = await userService.getById(result.updated_by, ['id', 'name'], []);
+    }
+  
+    const { created_by, updated_by, ...rest } = result;
+    return rest;
   }
 }

@@ -31,9 +31,7 @@ export class BaseController<CreateDTO, UpdateDTO> {
       this.respond(response, ServiceResult.success(`${this.entityName} List`, 200, result));
 
     } catch (exception) {
-
-      console.log(`${this.entityName} - Index: `, exception);
-      this.respond(response, ServiceResult.error('Something went wrong. Please try again later.'));
+      throw exception;
     }
   }
 
@@ -48,9 +46,7 @@ export class BaseController<CreateDTO, UpdateDTO> {
       this.respond(response, ServiceResult.success(`The ${this.entityName} was successfully created.`));
       
     } catch (exception) {
-
-      console.log(`${this.entityName} - Store: `, exception);
-      this.respond(response, ServiceResult.error('Something went wrong. Please try again later.'));
+      throw exception;
     }
   }
 
@@ -64,9 +60,7 @@ export class BaseController<CreateDTO, UpdateDTO> {
       this.respond(response, ServiceResult.success(`${this.entityName} Detail`, 200, result));
       
     } catch (exception) {
-
-      console.log(`${this.entityName} - Show: `, exception);
-      this.respond(response, ServiceResult.error('Something went wrong. Please try again later.'));
+      throw exception;
     }
   }
 
@@ -82,9 +76,7 @@ export class BaseController<CreateDTO, UpdateDTO> {
       this.respond(response, ServiceResult.success(`The ${this.entityName} was successfully updated.`));
       
     } catch (exception) {
-
-      console.log(`${this.entityName} - Update: `, exception);
-      this.respond(response, ServiceResult.error('Something went wrong. Please try again later.'));
+      throw exception;
     }
   }
 
@@ -98,9 +90,7 @@ export class BaseController<CreateDTO, UpdateDTO> {
       this.respond(response, ServiceResult.success(`The ${this.entityName} was successfully deleted.`));
       
     } catch (exception) {
-
-      console.log(`${this.entityName} - Delete: `, exception);
-      this.respond(response, ServiceResult.error('Something went wrong. Please try again later.'));
+      throw exception;
     }
   }
 }

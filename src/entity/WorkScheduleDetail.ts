@@ -1,8 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
 import { WorkSchedule } from './WorkSchedule';
 import { User } from './User';
+import { OfficeHour } from './OfficeHour';
+import { nullable } from 'zod';
 
 @Entity({ name: 'work_schedule_details' })
+@Unique(['day_number', 'work_schedule_id'])
 export class WorkScheduleDetail {
   
   @PrimaryGeneratedColumn()
@@ -10,16 +13,13 @@ export class WorkScheduleDetail {
 
   @ManyToOne(() => WorkSchedule, schedule => schedule.details)
   @JoinColumn({ name: 'work_schedule_id' })
-  schedule!: WorkSchedule;
+  schedule: WorkSchedule;
+
+  @Column()
+  work_schedule_id: number;
 
   @Column({ type: 'smallint' })
   day_number!: number; // 1-7 (Monday-Sunday)
-
-  @Column({ type: 'time' })
-  work_from!: string;
-
-  @Column({ type: 'time' })
-  work_to!: string;
 
   @Column({ default: false })
   is_off!: boolean;
@@ -30,11 +30,21 @@ export class WorkScheduleDetail {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updated_at!: Date;
 
-  @ManyToOne(() => User, user => user.created_work_schedule_details, { nullable: false })
+  @ManyToOne(() => User, user => user.created_work_schedule_details)
   @JoinColumn({ name: 'created_by' })
-  created_by!: User;
+  creator!: Partial<User>;
 
-  @ManyToOne(() => User, user => user.updated_work_schedule_details, { nullable: false })
+  @ManyToOne(() => User, user => user.updated_work_schedule_details)
   @JoinColumn({ name: 'updated_by' })
-  updated_by!: User;
+  updater!: Partial<User>;
+
+  @Column()
+  created_by!: number;
+
+  @Column()
+  updated_by!: number;
+
+  @ManyToOne(() => OfficeHour, officeHour => officeHour.scheduleDetails, { nullable: true })
+  @JoinColumn({ name: 'office_hour_id' })
+  officeHour?: OfficeHour;
 }

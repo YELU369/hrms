@@ -1,5 +1,6 @@
 import { BaseRepository } from "@/repositories/BaseRepository";
-import { ObjectLiteral, DeepPartial, FindManyOptions, FindOptionsWhere } from "typeorm";
+import { ObjectLiteral, DeepPartial, FindManyOptions, FindOptionsWhere, EntityManager } from "typeorm";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 export class BaseService<T extends ObjectLiteral> {
   
@@ -9,12 +10,12 @@ export class BaseService<T extends ObjectLiteral> {
     this.repo = repository;
   }
 
-  async getAll(options: FindManyOptions<T> = {}): Promise<T[]> {
+  async getAll(options: FindManyOptions<T> = {}): Promise<Partial<T>[]> {
     return await this.repo.getAll(options);
   }
 
-  async getById(id: number, relations: string[] = []): Promise<T> {
-    return await this.repo.getById(id, relations);
+  async getById(id: number, fields: string[] = [], relations: string[] = []): Promise<Partial<T>> {
+    return await this.repo.getById(id, fields, relations);
   }
 
   async store(data: DeepPartial<T>, userId: number): Promise<T> {
@@ -39,5 +40,13 @@ export class BaseService<T extends ObjectLiteral> {
 
   async exists(fields: FindOptionsWhere<T>): Promise<boolean> {
     return await this.repo.exists(fields);
+  }
+
+  async insert(dataArray: QueryDeepPartialEntity<T>[]): Promise<boolean> {
+    return await this.repo.insert(dataArray);
+  }
+
+  async storeOrNew(where: FindOptionsWhere<T>, data: DeepPartial<T>, userId?: number): Promise<T> {
+    return await this.repo.storeOrNew(where, data, userId);
   }
 }

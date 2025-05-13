@@ -2,6 +2,7 @@ import { Department } from "@/entity/Department";
 import { BaseRepository } from "./BaseRepository";
 import { Paginator, PaginationResult } from "@/helpers/Paginator";
 import { QueryBuilderWrapper } from "@/helpers/QueryBuilderWrapper";
+import { EntityManager } from "typeorm";
 
 export interface DepartmentSearchParams {
   keyword?: string
@@ -9,21 +10,20 @@ export interface DepartmentSearchParams {
 
 export class DepartmentRepository extends BaseRepository<Department> {
   
-  constructor() {
-    super(Department);
+  public manager: EntityManager;
+
+  constructor(manager?: EntityManager) {
+    super(Department, manager);
   }
 
   async getList(searchParams: DepartmentSearchParams, page = 0, limit = 100): Promise<PaginationResult<Department>> {
 
     const baseQuery = this.repo.createQueryBuilder('dept')
-                              .leftJoin('dept.updated_by', 'updater')
                               .select([
                                 'dept.id', 
                                 'dept.name', 
                                 'dept.description', 
-                                'dept.updated_at', 
-                                'updater.id', 
-                                'updater.name'
+                                'dept.updated_at'
                               ]);
 
     const wrapper = new QueryBuilderWrapper(baseQuery)

@@ -1,25 +1,25 @@
 import { BaseService } from "@/services/BaseService";
-import { PositionSalary } from "@/entity/PositionSalary";
-import { PositionSalaryRepository, PositionSalarySearchParams } from "@/repositories/PositionSalaryRepository";
+import { WorkScheduleDetail } from "@/entity/WorkScheduleDetail";
+import { WorkScheduleDetailRepository, WorkScheduleDetailSearchParams } from "@/repositories/WorkScheduleDetailRepository";
 import { PaginationResult } from "@/helpers/Paginator";
-import { EntityManager, FindManyOptions } from "typeorm";
 import { User } from "@/entity/User";
+import { EntityManager } from "typeorm";
 import { UserService } from "./UserService";
 
-export class PositionSalaryService extends BaseService<PositionSalary> {
+export class WorkScheduleDetailService extends BaseService<WorkScheduleDetail> {
 
-  public repo: PositionSalaryRepository;
+  public repo: WorkScheduleDetailRepository;
   public manager: EntityManager;
 
   constructor(manager?: EntityManager) {
-    super(new PositionSalaryRepository(manager));
+    super(new WorkScheduleDetailRepository(manager));
   }
 
-  async getList(searchParams: PositionSalarySearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<PositionSalary>> {
+  async getList(searchParams: WorkScheduleDetailSearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<WorkScheduleDetail>> {
     return await this.repo.getList(searchParams, page, limit);
   }
 
-  async getById(id: number, fields: string[] = [], relations: string[] = ['position', 'creator', 'updater']): Promise<Partial<PositionSalary>> {
+  async getById(id: number, fields: string[] = [], relations: string[] = ['creator', 'updater']): Promise<Partial<WorkScheduleDetail>> {
     
     const result = await super.getById(id, fields, []);
     

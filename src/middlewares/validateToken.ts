@@ -30,6 +30,7 @@ export const validateToken = async (request: AuthRequest, response: Response, ne
     next();
 
   } catch (error) {
+    
     response.status(401).json({
       success: false,
       message: 'TOKEN_INVALID',

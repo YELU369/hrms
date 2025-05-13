@@ -2,55 +2,64 @@ import { BaseService } from "@/services/BaseService";
 import { Position } from "@/entity/Position";
 import { PositionRepository, PositionSearchParams } from "@/repositories/PositionRepository";
 import { PaginationResult } from "@/helpers/Paginator";
-import { FindManyOptions } from "typeorm";
 import { User } from "@/entity/User";
+import { EntityManager } from "typeorm";
+import { UserService } from "./UserService";
+import { DepartmentService } from "./DepartmentService";
+import { PositionSalaryService } from "./PositionSalaryService";
+import { EmployeeService } from "./EmployeeService";
 
 export class PositionService extends BaseService<Position> {
 
   public repo: PositionRepository;
+  public manager: EntityManager;
 
-  constructor() {
-    super(new PositionRepository());
+  constructor(manager?: EntityManager) {
+    super(new PositionRepository(manager));
   }
 
   async getList(searchParams: PositionSearchParams = {}, page: number = 0, limit: number = 100): Promise<PaginationResult<Position>> {
     return await this.repo.getList(searchParams, page, limit);
   }
 
-  async getAll(options: FindManyOptions<Position> = {}): Promise<Position[]> {
-    return await this.repo.getAll(options);
-  }
-
-  async getById(id: number, relations: string[] = ['department', 'salaries', 'employees', 'created_by', 'updated_by']): Promise<Position> {
+  async getById(id: number, fields: string[] = [], relations: string[] = ['department', 'salaries', 'employees', 'creator', 'updater']): Promise<Partial<Position>> {
     
-    const result = await this.repo.getById(id, relations);
-
-    if (result.created_by) {
-      result.created_by = {
-        id: result.created_by.id,
-        name: result.created_by.name,
-      } as User;
+    const result = await super.getById(id, fields, []);
+    
+    if (relations.includes('department') && result.department_id != null) {
+      const deptService = new DepartmentService();
+      result.department = await deptService.getById(result.department_id, ['id', 'name']);
     }
 
-    if (result.updated_by) {
-      result.updated_by = {
-        id: result.updated_by.id,
-        name: result.updated_by.name,
-      } as User;
+    if (relations.includes('salaries')) {
+      const salaryService = new PositionSalaryService();
+      result.salaries = await salaryService.getAll({
+        select: ['id', 'start_from', 'min_salary', 'max_salary'], 
+        where: { position_id: result.id },
+        order: { start_from: 'DESC' }}
+      );
     }
 
-    return result;
-  }
+    if (relations.includes('employees')) {
+      const employeeService = new EmployeeService();
+      result.employees = await employeeService.getAll({
+        select: ['id', 'first_name', 'last_name', 'code'], 
+        where: { position_id: result.id },
+        order: { joined_date: 'DESC' }}
+      );
+    }
 
-  async store(data: Partial<Position>, userId: number): Promise<Position> {
-    return await this.repo.store(data, userId);
-  }
-
-  async update(id: number, data: Partial<Position>, userId: number): Promise<Position> {
-    return await this.repo.update(id, data, userId);
-  }
-
-  async delete(id: number): Promise<boolean> {
-    return await this.repo.delete(id);
+    if (relations.includes('creator') && result.created_by != null) {
+      const userService = new UserService();
+      result.creator = await userService.getById(result.created_by, ['id', 'name']);
+    }
+  
+    if (relations.includes('updater') && result.updated_by != null) {
+      const userService = new UserService();
+      result.updater = await userService.getById(result.updated_by, ['id', 'name']);
+    }
+  
+    const { created_by, updated_by, ...rest } = result;
+    return rest;
   }
 }

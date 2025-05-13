@@ -36,7 +36,7 @@ app.use("/", routes);
 // Error handling middleware
 app.use((error: Error, request: Request, response: Response, next: NextFunction) => {
 
-  console.error(error);
+  console.error('Error Handler:', error);
 
   const isJson = request.accepts('json');
   const status = error instanceof HttpException ? error.status : 500;
@@ -47,6 +47,7 @@ app.use((error: Error, request: Request, response: Response, next: NextFunction)
     response.status(status).json({
       success: false,
       message,
+      data: null
     });
 
   } else {
