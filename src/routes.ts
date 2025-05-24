@@ -84,7 +84,6 @@ router.get('/office_hours/view/:id', validateToken, officeHourController.show.bi
 
 router.get('/work_schedules', validateToken, workScheduleController.index.bind(workScheduleController));
 router.post('/work_schedules', validateToken, commonValidation(WorkScheduleCreateDTO), workScheduleController.store.bind(workScheduleController));
-router.post('/work_schedules/with-details', validateToken, commonValidation(WorkScheduleCreateDTO), workScheduleController.storeWithDetail.bind(workScheduleController));
 router.get('/work_schedules/view/:id', validateToken, workScheduleController.show.bind(workScheduleController));
 router.put('/work_schedules/update/:id', validateToken, commonValidation(WorkScheduleUpdateDTO), workScheduleController.update.bind(workScheduleController));
 router.delete('/work_schedules/delete/:id', validateToken, workScheduleController.delete.bind(workScheduleController));

@@ -13,7 +13,7 @@ export class WorkScheduleController extends BaseController<WorkScheduleCreateDTO
     super(new WorkScheduleService());
   }
 
-  async storeWithDetail(request: AuthRequest, response: Response): Promise<void> {
+  async store(request: AuthRequest, response: Response): Promise<void> {
     
     const data: WorkScheduleCreateDTO = request.body;
     const userId = Number(request.user_id);
@@ -24,6 +24,24 @@ export class WorkScheduleController extends BaseController<WorkScheduleCreateDTO
       await facade.store(data, userId);
 
       this.respond(response, ServiceResult.success(`The work schedule was successfully created.`));
+      
+    } catch (exception) {
+      throw exception;
+    }
+  }
+
+  async update(request: AuthRequest, response: Response): Promise<void> {
+    
+    const { id } = request.params;
+    const data: WorkScheduleCreateDTO = request.body;
+    const userId = Number(request.user_id);
+
+    try {
+      
+      const facade = new WorkScheduleFacade();
+      await facade.update(Number(id), data, userId);
+
+      this.respond(response, ServiceResult.success(`The work schedule was successfully updated.`));
       
     } catch (exception) {
       throw exception;

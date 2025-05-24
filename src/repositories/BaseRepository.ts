@@ -248,7 +248,7 @@ export class BaseRepository<T extends ObjectLiteral> {
   getMySQLERRORMessage(error: any): string {
 
     if (!error || !error.code) {
-      return 'Unknown database error';
+      return 'Something went wrong. Please try again later.';
     }
 
     switch (error.errno) {
