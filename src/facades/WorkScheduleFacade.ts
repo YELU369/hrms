@@ -17,8 +17,6 @@ export type PayloadType = {
   id?: number;
   title: string;
   description: string;
-  start_from: Date;
-  end_to?: Date;
   days: WorkScheduleDetailType[]
 }
 
@@ -46,9 +44,7 @@ export class WorkScheduleFacade {
       const workSchedule = await this.workScheduleService.store(
         {
           title: payload.title, 
-          description: payload.description, 
-          start_from: payload.start_from, 
-          end_to: payload.end_to
+          description: payload.description
         }, 
         userId
       );
@@ -107,9 +103,7 @@ export class WorkScheduleFacade {
         id, 
         {
           title: payload.title, 
-          description: payload.description, 
-          start_from: payload.start_from, 
-          end_to: payload.end_to
+          description: payload.description
         }, 
         userId
       );

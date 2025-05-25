@@ -11,13 +11,6 @@ export class CreateDTO {
   @Validate(UniqueValidator, [WorkSchedule, 'title'])
   title!: string;
 
-  @Type(() => Date)
-  @IsNotEmpty()
-  start_from!: Date;
-
-  @Type(() => Date)
-  end_to?: Date;
-
   @IsString()
   description: string;
 

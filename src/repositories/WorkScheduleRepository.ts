@@ -22,8 +22,6 @@ export class WorkScheduleRepository extends BaseRepository<WorkSchedule> {
                               .select([
                                 'workSchedule.id', 
                                 'workSchedule.title', 
-                                'workSchedule.start_from', 
-                                'workSchedule.end_to', 
                                 'workSchedule.description', 
                                 'workSchedule.updated_at'
                               ]);

@@ -10,13 +10,6 @@ export class UpdateDTO {
   @IsNotEmpty()
   title!: string;
 
-  @Type(() => Date)
-  @IsNotEmpty()
-  start_from!: Date;
-
-  @Type(() => Date)
-  end_to?: Date;
-
   @IsString()
   description: string;
 

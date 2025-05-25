@@ -12,12 +12,6 @@ export class WorkSchedule {
   @Column({ unique: true })
   title: string;
 
-  @Column({ type: 'date' })
-  start_from!: Date;
-
-  @Column({ type: 'date', nullable: true })
-  end_to?: Date;
-
   @Column({ nullable: true })
   description: string;
 
