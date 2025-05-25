@@ -25,8 +25,7 @@ export class LeaveTypeRepository extends BaseRepository<LeaveType> {
                                 'leaveType.name', 
                                 'leaveType.description', 
                                 'leaveType.is_paid', 
-                                'leaveType.max_days_per_year', 
-                                'leaveType.carry_over_days', 
+                                'leaveType.total_days', 
                                 'leaveType.updated_at'
                               ]);
 

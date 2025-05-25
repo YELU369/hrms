@@ -4,6 +4,8 @@ import { LeaveType } from '@/entity/LeaveType';
 
 export class UpdateDTO {
 
+  id!: number;
+  
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -17,10 +19,5 @@ export class UpdateDTO {
   @IsNumber()
   @IsPositive()
   @IsNotEmpty()
-  max_days_per_year: number;
-
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
-  carry_over_days: number;
+  total_days: number;
 }
