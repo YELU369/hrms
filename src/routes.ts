@@ -20,11 +20,17 @@ import { CreateDTO as EmployeeCreateDTO } from "@/DTOs/Employee/CreateDTO";
 import { UpdateDTO as EmployeeUpdateDTO } from "@/DTOs/Employee/UpdateDTO";
 import { CreateDTO as WorkScheduleCreateDTO } from "@/DTOs/WorkSchedule/CreateDTO";
 import { UpdateDTO as WorkScheduleUpdateDTO } from "@/DTOs/WorkSchedule/UpdateDTO";
+import { CreateDTO as ManagerCreateDTO } from "@/DTOs/Department/Manager/CreateDTO";
+import { UpdateDTO as ManagerUpdateDTO } from "@/DTOs/Department/Manager/UpdateDTO";
+import { CreateDTO as HolidayCreateDTO } from './DTOs/Holiday/CreateDTO';
+import { UpdateDTO as HolidayUpdateDTO } from './DTOs/Holiday/UpdateDTO';
 import { PositionSalaryController } from './controllers/PositionSalaryController';
 import { LeaveTypeController } from './controllers/LeaveTypeController';
 import { EmployeeController } from './controllers/EmployeeController';
 import { OfficeHourController } from './controllers/OfficeHourController';
 import { WorkScheduleController } from './controllers/WorkScheduleController';
+import { DepartmentManagerController } from './controllers/DepartmentManagerController';
+import { HolidayController } from './controllers/HolidayController';
 
 const router = Router();
 const userController = new UserController();
@@ -35,6 +41,8 @@ const leaveTypeController = new LeaveTypeController();
 const employeeController = new EmployeeController();
 const officeHourController = new OfficeHourController();
 const workScheduleController = new WorkScheduleController();
+const departmentManagerController = new DepartmentManagerController();
+const holidayController = new HolidayController();
 
 router.get('/', (request: Request, response: Response): void => {
   response.status(200).send('Hello World with TypeScript!');
@@ -87,5 +95,17 @@ router.post('/work_schedules', validateToken, commonValidation(WorkScheduleCreat
 router.get('/work_schedules/view/:id', validateToken, workScheduleController.show.bind(workScheduleController));
 router.put('/work_schedules/update/:id', validateToken, commonValidation(WorkScheduleUpdateDTO), workScheduleController.update.bind(workScheduleController));
 router.delete('/work_schedules/delete/:id', validateToken, workScheduleController.delete.bind(workScheduleController));
+
+router.get('/managers', validateToken, departmentManagerController.index.bind(departmentManagerController));
+router.post('/managers', validateToken, commonValidation(ManagerCreateDTO), departmentManagerController.store.bind(departmentManagerController));
+router.get('/managers/view/:id', validateToken, departmentManagerController.show.bind(departmentManagerController));
+router.put('/managers/update/:id', validateToken, commonValidation(ManagerUpdateDTO), departmentManagerController.update.bind(departmentManagerController));
+router.delete('/managers/delete/:id', validateToken, departmentManagerController.delete.bind(departmentManagerController));
+
+router.get('/holidays', validateToken, holidayController.index.bind(holidayController));
+router.post('/holidays', validateToken, commonValidation(HolidayCreateDTO), holidayController.store.bind(holidayController));
+router.get('/holidays/view/:id', validateToken, holidayController.show.bind(holidayController));
+router.put('/holidays/update/:id', validateToken, commonValidation(HolidayUpdateDTO), holidayController.update.bind(holidayController));
+router.delete('/holidays/delete/:id', validateToken, holidayController.delete.bind(holidayController));
 
 export default router;

@@ -19,10 +19,7 @@ export class LeaveType {
   is_paid!: boolean;
 
   @Column({ type: 'smallint' })
-  max_days_per_year!: number;
-
-  @Column({ type: 'smallint', default: 0 })
-  carry_over_days!: number;
+  total_days!: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at!: Date;

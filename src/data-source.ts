@@ -24,6 +24,7 @@ import { BlacklistedToken } from "./entity/BlacklistedToken"
 import { EmployeeUser } from "./entity/EmployeeUser"
 import { EmployeeWorkSchedule } from "./entity/EmployeeWorkSchedule"
 import { OfficeHour } from "./entity/OfficeHour"
+import { Holiday } from "./entity/Holiday"
 
 // console.log('DB Config: ', dbconfig);
 
@@ -65,7 +66,8 @@ export const AppDataSource = new DataSource({
         BlacklistedToken, 
         EmployeeUser, 
         EmployeeWorkSchedule, 
-        OfficeHour
+        OfficeHour, 
+        Holiday, 
     ],
     migrations: [],
     subscribers: [],

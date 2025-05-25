@@ -14,6 +14,7 @@ import { EmployeeSalary } from './EmployeeSalary';
 import { Employee } from './Employee';
 import { EmployeeUser } from './EmployeeUser';
 import { OfficeHour } from './OfficeHour';
+import { Holiday } from './Holiday';
 
 @Entity({ name: 'users' })
 export class User {
@@ -87,4 +88,7 @@ export class User {
 
   created_office_hours: OfficeHour[];
   updated_office_hours: OfficeHour[];
+
+  created_holidays: Holiday[];
+  updated_holidays: Holiday[];
 }
