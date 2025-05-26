@@ -107,6 +107,5 @@ export class Employee {
   userBinding!: EmployeeUser[];
 
   @OneToOne(() => WorkShiftDetail, workShiftDetail => workShiftDetail.employee)
-  @JoinColumn({ name: 'employee_id' })
   workShiftDetail!: Partial<WorkShiftDetail>;
 }

@@ -26,6 +26,7 @@ import { CreateDTO as HolidayCreateDTO } from './DTOs/Holiday/CreateDTO';
 import { UpdateDTO as HolidayUpdateDTO } from './DTOs/Holiday/UpdateDTO';
 import { CreateDTO as WorkShiftCreateDTO } from "@/DTOs/WorkShift/CreateDTO";
 import { UpdateDTO as WorkShiftUpdateDTO } from "@/DTOs/WorkShift/UpdateDTO";
+import { CreateDTO as WorkShiftDetailCreateDTO } from '@/DTOs/WorkShift//Detail/CreateDTO';
 import { PositionSalaryController } from './controllers/PositionSalaryController';
 import { LeaveTypeController } from './controllers/LeaveTypeController';
 import { EmployeeController } from './controllers/EmployeeController';
@@ -34,6 +35,7 @@ import { WorkScheduleController } from './controllers/WorkScheduleController';
 import { DepartmentManagerController } from './controllers/DepartmentManagerController';
 import { HolidayController } from './controllers/HolidayController';
 import { WorkShiftController } from './controllers/WorkShiftController';
+import { WorkShiftDetailController } from './controllers/WorkShiftDetailController';
 
 const router = Router();
 const userController = new UserController();
@@ -47,6 +49,7 @@ const workScheduleController = new WorkScheduleController();
 const departmentManagerController = new DepartmentManagerController();
 const holidayController = new HolidayController();
 const workShiftController = new WorkShiftController();
+const workShiftDetailController = new WorkShiftDetailController();
 
 router.get('/', (request: Request, response: Response): void => {
   response.status(200).send('Hello World with TypeScript!');
@@ -117,5 +120,7 @@ router.post('/workshifts', validateToken, commonValidation(WorkShiftCreateDTO), 
 router.get('/workshifts/view/:id', validateToken, workShiftController.show.bind(workShiftController));
 router.put('/workshifts/update/:id', validateToken, commonValidation(WorkShiftUpdateDTO), workShiftController.update.bind(workShiftController));
 router.delete('/workshifts/delete/:id', validateToken, workShiftController.delete.bind(workShiftController));
+
+router.post('/employee_workshifts', validateToken, commonValidation(WorkShiftDetailCreateDTO), workShiftDetailController.store.bind(workShiftDetailController));
 
 export default router;
