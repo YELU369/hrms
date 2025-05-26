@@ -13,7 +13,7 @@ import { EmployeeEmergencyContact } from './EmployeeEmergencyContact';
 import { EmployeeSalary } from './EmployeeSalary';
 import { User } from './User';
 import { EmployeeUser } from './EmployeeUser';
-import { EmployeeWorkSchedule } from './EmployeeWorkSchedule';
+import { WorkShiftDetail } from './WorkShiftDetail';
 
 @Entity({ name: 'employees' })
 export class Employee {
@@ -106,7 +106,7 @@ export class Employee {
   @OneToOne(() => EmployeeUser, userBinding => userBinding.employee)
   userBinding!: EmployeeUser[];
 
-  @OneToOne(() => EmployeeWorkSchedule, scheduleBinding => scheduleBinding.employee)
+  @OneToOne(() => WorkShiftDetail, workShiftDetail => workShiftDetail.employee)
   @JoinColumn({ name: 'employee_id' })
-  scheduleBinding!: EmployeeWorkSchedule[];
+  workShiftDetail!: WorkShiftDetail[];
 }

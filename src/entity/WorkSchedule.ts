@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from './User';
 import { WorkScheduleDetail } from './WorkScheduleDetail';
-import { EmployeeWorkSchedule } from './EmployeeWorkSchedule';
+import { WorkShift } from './WorkShift';
 
 @Entity({ name: 'work_schedules' })
 export class WorkSchedule {
@@ -38,7 +38,7 @@ export class WorkSchedule {
   @Column()
   updated_by!: number;
   
-  @OneToMany(() => EmployeeWorkSchedule, scheduleBindings => scheduleBindings.schedule)
+  @OneToMany(() => WorkShift, workShifts => workShifts.schedule)
   @JoinColumn({ name: 'work_schedule_id' })
-  scheduleBindings!: EmployeeWorkSchedule[];
+  workShifts!: WorkShift[];
 }

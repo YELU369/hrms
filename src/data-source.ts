@@ -22,11 +22,10 @@ import { WorkScheduleDetail } from "./entity/WorkScheduleDetail"
 import { EmailVerification } from "./entity/EmailVerification"
 import { BlacklistedToken } from "./entity/BlacklistedToken"
 import { EmployeeUser } from "./entity/EmployeeUser"
-import { EmployeeWorkSchedule } from "./entity/EmployeeWorkSchedule"
+import { WorkShift } from "./entity/WorkShift"
 import { OfficeHour } from "./entity/OfficeHour"
 import { Holiday } from "./entity/Holiday"
-
-// console.log('DB Config: ', dbconfig);
+import { WorkShiftDetail } from "./entity/WorkShiftDetail"
 
 export const AppDataSource = new DataSource({
 
@@ -65,7 +64,8 @@ export const AppDataSource = new DataSource({
         WorkScheduleDetail,
         BlacklistedToken, 
         EmployeeUser, 
-        EmployeeWorkSchedule, 
+        WorkShift, 
+        WorkShiftDetail, 
         OfficeHour, 
         Holiday, 
     ],
