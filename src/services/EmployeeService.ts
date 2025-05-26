@@ -13,6 +13,10 @@ import { EntityManager, FindManyOptions } from "typeorm";
 import { BaseService } from "./BaseService";
 import { EmployeeRepository } from "@/repositories/EmployeeRepository";
 import { PositionService } from "./PositionService";
+import { WorkShiftDetailService } from "./WorkShiftDetailService";
+import { WorkShiftDetail } from "@/entity/WorkShiftDetail";
+import { WorkShiftService } from "./WorkShiftService";
+import { WorkScheduleService } from "./WorkScheduleService";
 
 export interface EmployeeSearchParams {
   keyword?: string, 
@@ -87,13 +91,53 @@ export class EmployeeService extends BaseService<Employee> {
     }
   }  
 
-  async getById(id: number, fields: string[] = [], relations: string[] = ['position', 'creator', 'updater']): Promise<Partial<Employee>> {
+  async getWorkShiftInfo(employeeId: number): Promise<any> {
+
+    if (!employeeId) {
+      throw new Error('Employee ID is required');
+    }
+
+    const workShiftDetailService = new WorkShiftDetailService(); 
+    const workShiftService = new WorkShiftService();
+    const workShiftDetail = await workShiftDetailService.findOneBy({ employee_id: employeeId });
+
+    if (!workShiftDetail) {
+      throw new Error('Work shift detail not found for the employee');
+    }
+
+    const workShift = await workShiftService.getById(
+      workShiftDetail.work_shift_id, 
+      ['id', 'work_schedule_id', 'start_from', 'end_to'], 
+    );
+
+    if (!workShift.work_schedule_id) {
+      throw new Error('Work shift does not have an associated work schedule');
+    }
+
+    const workScheduleService = new WorkScheduleService();
+    const workSchedule = await workScheduleService.getById(workShift.work_schedule_id, ['title', 'description']) as any;
+    workSchedule.start_from = workShift.start_from;
+    workSchedule.end_to = workShift.end_to;
+
+    return workSchedule;
+  }
+
+  async getById(id: number, fields: string[] = [], relations: string[] = ['position', 'workShiftDetail', 'creator', 'updater']): Promise<Partial<Employee>> {
       
     const result = await super.getById(id, fields, []);
 
     if (relations.includes('position') && result.position_id != null) {
       const positionService = new PositionService();
-      result.position = await positionService.getById(result.position_id, ['id', 'title'], []);
+      result.position = await positionService.getById(result.position_id, ['id', 'title', 'department_id'], ['department']);
+
+      if (result.position) {
+        delete result.position.department_id;
+      }
+    }
+
+    let work_shift_info: any = undefined;
+    if (relations.includes('workShiftDetail')) {
+      work_shift_info = await this.getWorkShiftInfo(id) as any || undefined; 
     }
 
     if (relations.includes('creator') && result.created_by != null) {
@@ -105,9 +149,11 @@ export class EmployeeService extends BaseService<Employee> {
       const userService = new UserService();
       result.updater = await userService.getById(result.updated_by, ['id', 'name'], []);
     }
-  
     const { created_by, updated_by, ...rest } = result;
-    return rest;
 
+    return {
+      ...rest,
+      ...(relations.includes('workShiftDetail')? { work_shift_info } : {}),
+    };
   }
 }

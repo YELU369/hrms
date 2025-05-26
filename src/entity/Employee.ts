@@ -108,5 +108,5 @@ export class Employee {
 
   @OneToOne(() => WorkShiftDetail, workShiftDetail => workShiftDetail.employee)
   @JoinColumn({ name: 'employee_id' })
-  workShiftDetail!: WorkShiftDetail[];
+  workShiftDetail!: Partial<WorkShiftDetail>;
 }

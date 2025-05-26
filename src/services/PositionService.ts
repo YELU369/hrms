@@ -22,7 +22,7 @@ export class PositionService extends BaseService<Position> {
     return await this.repo.getList(searchParams, page, limit);
   }
 
-  async getById(id: number, fields: string[] = [], relations: string[] = ['department', 'salaries', 'employees', 'creator', 'updater']): Promise<Partial<Position>> {
+  async getById(id: number, fields: string[] = [], relations: string[] = ['department', 'creator', 'updater']): Promise<Partial<Position>> {
     
     const result = await super.getById(id, fields, []);
     
