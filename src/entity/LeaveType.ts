@@ -41,7 +41,7 @@ export class LeaveType {
   @Column()
   updated_by!: number;
 
-  @OneToMany(() => LeaveBalance, balance => balance.leave_type)
+  @OneToMany(() => LeaveBalance, balance => balance.leaveType)
   balances!: LeaveBalance[];
 
   @OneToMany(() => LeaveRequest, request => request.leave_type)

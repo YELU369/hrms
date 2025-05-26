@@ -30,6 +30,7 @@ export const commonValidation = (DtoClass: any) => {
         };
 
         response.status(400).json(formattedErrors);
+        return;
       }
 
       next();
