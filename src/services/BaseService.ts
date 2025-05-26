@@ -49,4 +49,8 @@ export class BaseService<T extends ObjectLiteral> {
   async storeOrNew(where: FindOptionsWhere<T>, data: DeepPartial<T>, userId?: number): Promise<T> {
     return await this.repo.storeOrNew(where, data, userId);
   }
+
+  async deleteBy(where: FindOptionsWhere<T>): Promise<boolean> {
+    return await this.repo.deleteBy(where);
+  }
 }

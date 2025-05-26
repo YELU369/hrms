@@ -245,6 +245,31 @@ export class BaseRepository<T extends ObjectLiteral> {
     }
   }
 
+  async deleteBy(where: FindOptionsWhere<T>): Promise<boolean> {
+
+    try {
+
+      const result = await this.repo
+                      .createQueryBuilder()
+                      .delete()
+                      .from(this.repo.metadata.target)
+                      .where(where)
+                      .execute();
+
+      if (result.affected && result.affected > 0) {
+        return true;
+      }
+
+      throw new NotFoundException(`${this.constructor.name.replace('Repository', '')} not found for deletion.`);
+
+    } catch (exception) {
+      
+      console.error(`${this.constructor.name} - deleteBy:`, exception);
+      const message = this.getMySQLERRORMessage(exception);
+      throw new BadRequestException(message);
+    }
+  }
+
   getMySQLERRORMessage(error: any): string {
 
     if (!error || !error.code) {

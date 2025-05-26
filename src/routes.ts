@@ -24,6 +24,8 @@ import { CreateDTO as ManagerCreateDTO } from "@/DTOs/Department/Manager/CreateD
 import { UpdateDTO as ManagerUpdateDTO } from "@/DTOs/Department/Manager/UpdateDTO";
 import { CreateDTO as HolidayCreateDTO } from './DTOs/Holiday/CreateDTO';
 import { UpdateDTO as HolidayUpdateDTO } from './DTOs/Holiday/UpdateDTO';
+import { CreateDTO as WorkShiftCreateDTO } from "@/DTOs/WorkShift/CreateDTO";
+import { UpdateDTO as WorkShiftUpdateDTO } from "@/DTOs/WorkShift/UpdateDTO";
 import { PositionSalaryController } from './controllers/PositionSalaryController';
 import { LeaveTypeController } from './controllers/LeaveTypeController';
 import { EmployeeController } from './controllers/EmployeeController';
@@ -31,6 +33,7 @@ import { OfficeHourController } from './controllers/OfficeHourController';
 import { WorkScheduleController } from './controllers/WorkScheduleController';
 import { DepartmentManagerController } from './controllers/DepartmentManagerController';
 import { HolidayController } from './controllers/HolidayController';
+import { WorkShiftController } from './controllers/WorkShiftController';
 
 const router = Router();
 const userController = new UserController();
@@ -43,6 +46,7 @@ const officeHourController = new OfficeHourController();
 const workScheduleController = new WorkScheduleController();
 const departmentManagerController = new DepartmentManagerController();
 const holidayController = new HolidayController();
+const workShiftController = new WorkShiftController();
 
 router.get('/', (request: Request, response: Response): void => {
   response.status(200).send('Hello World with TypeScript!');
@@ -107,5 +111,11 @@ router.post('/holidays', validateToken, commonValidation(HolidayCreateDTO), holi
 router.get('/holidays/view/:id', validateToken, holidayController.show.bind(holidayController));
 router.put('/holidays/update/:id', validateToken, commonValidation(HolidayUpdateDTO), holidayController.update.bind(holidayController));
 router.delete('/holidays/delete/:id', validateToken, holidayController.delete.bind(holidayController));
+
+router.get('/workshifts', validateToken, workShiftController.index.bind(workShiftController));
+router.post('/workshifts', validateToken, commonValidation(WorkShiftCreateDTO), workShiftController.store.bind(workShiftController));
+router.get('/workshifts/view/:id', validateToken, workShiftController.show.bind(workShiftController));
+router.put('/workshifts/update/:id', validateToken, commonValidation(WorkShiftUpdateDTO), workShiftController.update.bind(workShiftController));
+router.delete('/workshifts/delete/:id', validateToken, workShiftController.delete.bind(workShiftController));
 
 export default router;
